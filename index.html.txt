@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Сад Привычек</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+      color: #2d3436;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      animation: fadeIn 0.6s ease-in;
+    }
+
+    .logo {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 600;
+      color: #27ae60;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    p {
+      font-size: 18px;
+      color: #636e72;
+      line-height: 1.6;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .status {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
+      font-size: 14px;
+      color: #27ae60;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .leaf {
+      position: absolute;
+      opacity: 0.3;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .leaf:nth-child(1) {
+      top: 10%;
+      left: 10%;
+      font-size: 40px;
+      animation-delay: 0s;
+    }
+
+    .leaf:nth-child(2) {
+      top: 20%;
+      right: 15%;
+      font-size: 30px;
+      animation-delay: 1s;
+    }
+
+    .leaf:nth-child(3) {
+      bottom: 15%;
+      left: 20%;
+      font-size: 35px;
+      animation-delay: 2s;
+    }
+
+    .leaf:nth-child(4) {
+      bottom: 25%;
+      right: 10%;
+      font-size: 25px;
+      animation-delay: 1.5s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-20px) rotate(10deg);
+      }
+    }
+
+    /* Адаптация под тёмную тему Telegram */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0d3d1f 100%);
+        color: #e0e0e0;
+      }
+      
+      h1 {
+        color: #4ade80;
+      }
+      
+      p {
+        color: #9ca3af;
+      }
+      
+      .status {
+        background: rgba(255, 255, 255, 0.1);
+        color: #4ade80;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Декоративные листья -->
+  <div class="leaf">🌿</div>
+  <div class="leaf">🍃</div>
+  <div class="leaf">🌱</div>
+  <div class="leaf">🌿</div>
+
+  <!-- Основной контент -->
+  <div class="container">
+    <div class="logo">🌿</div>
+    <h1>Сад Привычек</h1>
+    <p>Привет! Скоро тут будет твой сад 🦥</p>
+    <div class="status" id="status">Загрузка...</div>
+  </div>
+
+  <script>
+    // Инициализация Telegram Web App
+    const tg = window.Telegram.WebApp;
+    
+    // Готовность приложения
+    tg.ready();
+    
+    // Разворачиваем на весь экран
+    tg.expand();
+    
+    // Проверяем, что приложение открыто в Telegram
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      const userId = tg.initDataUnsafe.user.id;
+      const firstName = tg.initDataUnsafe.user.first_name || 'Пользователь';
+      
+      console.log("User ID:", userId);
+      console.log("Full user data:", tg.initDataUnsafe.user);
+      
+      // Обновляем статус на экране
+      document.getElementById('status').textContent = `✅ Привет, ${firstName}!`;
+      
+      // Применяем цветовую схему Telegram
+      document.body.style.background = tg.themeParams.bg_color || document.body.style.background;
+      document.body.style.color = tg.themeParams.text_color || document.body.style.color;
+      
+    } else {
+      console.warn("Приложение не открыто в Telegram или данные недоступны");
+      document.getElementById('status').textContent = '⚠️ Откройте через Telegram';
+    }
+    
+    // Логируем все доступные данные для отладки
+    console.log("Telegram Web App version:", tg.version);
+    console.log("Platform:", tg.platform);
+    console.log("Theme params:", tg.themeParams);
+    console.log("Init data:", tg.initData);
+  </script>
+</body>
+</html>
