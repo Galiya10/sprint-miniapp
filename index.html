@@ -6,52 +6,88 @@
     <title>Сад Привычек</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
             color: #2d3436;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
-            margin: 0;
         }
 
-        .container {
+        .header {
             text-align: center;
+            margin-bottom: 30px;
             animation: fadeIn 0.6s ease-in;
         }
 
         .logo {
-            font-size: 80px;
-            margin-bottom: 20px;
+            font-size: 60px;
+            margin-bottom: 10px;
             animation: bounce 2s ease-in-out infinite;
         }
 
         h1 {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 600;
             color: #27ae60;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
         }
 
-        p {
-            font-size: 18px;
+        .subtitle {
+            font-size: 14px;
             color: #636e72;
-            line-height: 1.6;
-            max-width: 300px;
-            margin: 0 auto 30px;
+        }
+
+        .add-habit {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            color: #636e72;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #27ae60;
         }
 
         .btn {
+            width: 100%;
             background: #27ae60;
             color: white;
             border: none;
-            padding: 16px 32px;
-            font-size: 18px;
-            border-radius: 30px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
             transition: all 0.3s;
@@ -63,6 +99,95 @@
             box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
         }
 
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .habits-list {
+            animation: fadeIn 1s ease-in;
+        }
+
+        .habit-card {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 12px;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .habit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .habit-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .habit-day {
+            font-size: 14px;
+            color: #27ae60;
+            font-weight: 600;
+            background: #e8f5e9;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .habit-progress {
+            width: 100%;
+            height: 8px;
+            background: #dfe6e9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .water-btn {
+            width: 100%;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .water-btn:hover {
+            background: #2980b9;
+        }
+
+        .water-btn.watered {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #636e72;
+        }
+
+        .empty-state .icon {
+            font-size: 60px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -72,14 +197,41 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Шапка -->
+    <div class="header">
         <div class="logo">🦥</div>
-        <h1>Привет! Я Спринт</h1>
-        <p>Твой садовник привычек. Выращивай полезные привычки каждый день!</p>
-        <button class="btn" onclick="startApp()">Начать</button>
+        <h1>Сад Привычек</h1>
+        <div class="subtitle">Выращивай полезные привычки каждый день!</div>
+    </div>
+
+    <!-- Форма добавления привычки -->
+    <div class="add-habit">
+        <div class="input-group">
+            <label for="habitInput">Какую привычку хочешь вырастить?</label>
+            <input 
+                type="text" 
+                id="habitInput" 
+                placeholder="Например: Зарядка 10 минут"
+                maxlength="50"
+            >
+        </div>
+        <button class="btn" onclick="addHabit()">🌱 Посадить привычку</button>
+    </div>
+
+    <!-- Список привычек -->
+    <div class="habits-list" id="habitsList">
+        <div class="empty-state">
+            <div class="icon">🌿</div>
+            <p>Твой сад пока пуст.<br>Посади первую привычку!</p>
+        </div>
     </div>
 
     <script>
@@ -87,9 +239,113 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        function startApp() {
-            alert('Скоро здесь появится твой сад! 🌿');
-            // Здесь будет логика создания привычки
+        // Получить данные из LocalStorage
+        let habits = JSON.parse(localStorage.getItem('habits')) || [];
+
+        // Отобразить привычки при загрузке
+        renderHabits();
+
+        // Функция добавления привычки
+        function addHabit() {
+            const input = document.getElementById('habitInput');
+            const habitName = input.value.trim();
+
+            if (habitName === '') {
+                tg.showAlert('Введи название привычки!');
+                return;
+            }
+
+            // Создать новую привычку
+            const newHabit = {
+                id: Date.now(),
+                name: habitName,
+                day: 1,
+                lastWatered: null,
+                createdAt: new Date().toISOString()
+            };
+
+            habits.push(newHabit);
+            localStorage.setItem('habits', JSON.stringify(habits));
+
+            // Очистить поле ввода
+            input.value = '';
+
+            // Обновить список
+            renderHabits();
+
+            // Уведомление
+            tg.showPopup({
+                message: `🌱 Привычка "${habitName}" посажена!`,
+                buttons: [{type: 'ok'}]
+            });
+        }
+
+        // Функция отображения привычек
+        function renderHabits() {
+            const container = document.getElementById('habitsList');
+
+            if (habits.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🌿</div>
+                        <p>Твой сад пока пуст.<br>Посади первую привычку!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = habits.map(habit => {
+                const progress = (habit.day / 30) * 100;
+                const today = new Date().toDateString();
+                const lastWatered = habit.lastWatered ? new Date(habit.lastWatered).toDateString() : null;
+                const isWateredToday = lastWatered === today;
+
+                return `
+                    <div class="habit-card">
+                        <div class="habit-header">
+                            <div class="habit-name">${habit.name}</div>
+                            <div class="habit-day">День ${habit.day}/30</div>
+                        </div>
+                        <div class="habit-progress">
+                            <div class="progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                        <button 
+                            class="water-btn ${isWateredToday ? 'watered' : ''}" 
+                            onclick="waterHabit(${habit.id})"
+                            ${isWateredToday ? 'disabled' : ''}
+                        >
+                            ${isWateredToday ? '✅ Полито сегодня' : '💧 Полить'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Функция полива привычки
+        function waterHabit(habitId) {
+            const habit = habits.find(h => h.id === habitId);
+            if (!habit) return;
+
+            // Обновить день и дату полива
+            habit.day += 1;
+            habit.lastWatered = new Date().toISOString();
+
+            // Проверить, достиг ли 30 дней
+            if (habit.day > 30) {
+                tg.showPopup({
+                    message: `🎉 Поздравляю! Привычка "${habit.name}" укоренилась!`,
+                    buttons: [{type: 'ok'}]
+                });
+                // Можно удалить привычку или оставить
+            }
+
+            localStorage.setItem('habits', JSON.stringify(habits));
+            renderHabits();
+        }
+
+        // Отправить данные в бота (для будущей интеграции с БД)
+        function sendDataToBot() {
+            tg.sendData(JSON.stringify({habits: habits}));
         }
     </script>
 </body>
