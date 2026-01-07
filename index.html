@@ -1,491 +1,861 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Спринт - Календарь</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Шрифт Nunito -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Спринт - Трекер привычек</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
-            min-height: 100vh;
-            padding: 20px 16px 80px;
-        }
+    body {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      padding: 0;
+      padding-bottom: 80px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        /* Шапка */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
+    /* Шапка с отступом для системной области Telegram */
+    .header {
+      padding: max(env(safe-area-inset-top), 20px) 20px 20px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: #0a0a0a;
+      z-index: 100;
+    }
 
-        .header h1 {
-            font-size: 32px;
-            font-weight: 800;
-        }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+    }
 
-        .balance {
-            background: #2a2a2a;
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 18px;
-            font-weight: 700;
-        }
+    .balance {
+      background: #2a2a2a;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.3s ease;
+    }
 
-        .flower-icon {
-            width: 24px;
-            height: 24px;
-            background: #c8e67f;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .balance.bounce {
+      animation: bounce 0.5s ease;
+    }
 
-        /* Календарь */
-        .calendar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 32px;
-            gap: 4px;
-        }
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
 
-        .calendar-day {
-            flex: 1;
-            text-align: center;
-        }
+    /* Календарь */
+    .calendar {
+      padding: 0 20px 20px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
 
-        .day-label {
-            font-size: 12px;
-            color: #888888;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
+    .calendar-week {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
 
-        .day-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #888888;
-        }
+    .calendar-day {
+      flex: 1;
+      min-width: 40px;
+      text-align: center;
+    }
 
-        .calendar-day.past .day-number {
-            color: #ffffff;
-        }
+    .day-name {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+      text-transform: lowercase;
+    }
 
-        .calendar-day.today {
-            position: relative;
-        }
+    .day-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 auto;
+    }
 
-        .calendar-day.today .day-number {
-            color: #ffffff;
-            background: transparent;
-            border: 2px solid #c8e67f;
-            border-radius: 12px;
-            padding: 8px 12px;
-        }
+    .day-number.past {
+      color: #ffffff;
+    }
 
-        /* Раздел (категория) */
-        .category {
-            margin-bottom: 24px;
-        }
+    .day-number.today {
+      color: #ffffff;
+      border: 2px solid #a4e34e;
+      background: rgba(164, 227, 78, 0.1);
+    }
 
-        .category-title {
-            font-size: 16px;
-            color: #888888;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
+    .day-number.future {
+      color: #555;
+    }
 
-        /* Карточка привычки */
-        .habit-card {
-            background: #1a1a1a;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 2px solid;
-            position: relative;
-        }
+    /* Категории и привычки */
+    .content {
+      padding: 0 20px;
+    }
 
-        .habit-card.green { border-color: #4ade80; }
-        .habit-card.blue { border-color: #60a5fa; }
-        .habit-card.red { border-color: #f87171; }
-        .habit-card.yellow { border-color: #fbbf24; }
+    .category {
+      margin-bottom: 30px;
+    }
 
-        .habit-info {
-            flex: 1;
-        }
+    .category-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #888;
+      margin-bottom: 12px;
+    }
 
-        .habit-name {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
+    .habit-card {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .habit-reward {
-            font-size: 14px;
-            color: #c8e67f;
-            font-weight: 600;
-        }
+    .habit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 16px;
+      padding: 2px;
+      background: var(--habit-color, #4CAF50);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
 
-        .habit-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+    .habit-icon {
+      font-size: 32px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2a2a2a;
+      border-radius: 50%;
+    }
 
-        .plant-icon {
-            width: 48px;
-            height: 48px;
-            background: #2a2a2a;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
+    .habit-info {
+      flex: 1;
+    }
 
-        .check-btn {
-            width: 48px;
-            height: 48px;
-            background: #4ade80;
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+    .habit-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
 
-        .check-btn:hover {
-            transform: scale(1.1);
-        }
+    .habit-reward {
+      font-size: 14px;
+      color: #888;
+    }
 
-        .check-btn.completed {
-            background: #6b7280;
-            cursor: not-allowed;
-        }
+    .habit-check {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #2a2a2a;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #555;
+      transition: all 0.2s ease;
+    }
 
-        /* Кнопка добавления */
-        .add-habit-btn {
-            width: 100%;
-            background: #2a2a2a;
-            color: #666666;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 16px;
-        }
+    .habit-check:active {
+      transform: scale(1.2);
+    }
 
-        /* Модальное окно (Спринт) */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
+    .habit-check.completed {
+      background: var(--habit-color, #4CAF50);
+      color: #ffffff;
+    }
 
-        .modal.active {
-            display: flex;
-        }
+    /* Кнопка добавления */
+    .add-habit-btn {
+      width: 100%;
+      padding: 16px;
+      background: #2a2a2a;
+      border: 2px dashed #444;
+      border-radius: 16px;
+      color: #888;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s ease;
+    }
 
-        .modal-content {
-            background: #2a2a2a;
-            border-radius: 24px;
-            padding: 0;
-            max-width: 400px;
-            width: 90%;
-            position: relative;
-            overflow: hidden;
-        }
+    .add-habit-btn:active {
+      background: #333;
+    }
 
-        .modal-header {
-            background: #3a3a3a;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: relative;
-        }
+    /* Нижняя навигация */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0a0a0a;
+      border-top: 1px solid #2a2a2a;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 max(env(safe-area-inset-bottom), 12px);
+      z-index: 100;
+    }
 
-        .sprint-avatar {
-            width: 120px;
-            height: 120px;
-        }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #555;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
 
-        .sprint-name {
-            background: #4ade80;
-            color: #000000;
-            padding: 8px 20px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 18px;
-        }
+    .nav-item.active {
+      color: #a4e34e;
+    }
 
-        .close-modal {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 40px;
-            height: 40px;
-            background: #4a4a4a;
-            border: none;
-            border-radius: 50%;
-            color: #c8e67f;
-            font-size: 24px;
-            cursor: pointer;
-        }
+    .nav-icon {
+      font-size: 24px;
+    }
 
-        .modal-body {
-            padding: 24px;
-            text-align: center;
-        }
+    /* Модальное окно Спринта */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
 
-        .modal-text {
-            font-size: 20px;
-            font-weight: 600;
-            line-height: 1.5;
-        }
+    .modal.show {
+      display: flex;
+    }
 
-        /* Нижняя навигация */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #1a1a1a;
-            border-top: 1px solid #2a2a2a;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            padding: 8px;
-            color: #666666;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 600;
-        }
+    .modal-card {
+      background: #2a2a2a;
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 90%;
+      width: 320px;
+      position: relative;
+      animation: slideUp 0.3s ease;
+    }
 
-        .nav-item.active {
-            color: #c8e67f;
-        }
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
 
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-    </style>
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #1a1a1a;
+      border: none;
+      color: #888;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sprint-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .sprint-avatar {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 12px;
+      font-size: 60px;
+    }
+
+    .sprint-badge {
+      background: #a4e34e;
+      color: #0a0a0a;
+      padding: 6px 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .sprint-message {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #ddd;
+      text-align: center;
+    }
+
+    /* Форма добавления привычки */
+    .habit-form {
+      display: none;
+      margin-bottom: 20px;
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .habit-form.show {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      background: #2a2a2a;
+      border: 2px solid #333;
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 16px;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #a4e34e;
+    }
+
+    .color-picker {
+      display: flex;
+      gap: 12px;
+    }
+
+    .color-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .color-option.selected {
+      border-color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .form-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    .form-btn.primary {
+      background: #a4e34e;
+      color: #0a0a0a;
+    }
+
+    .form-btn.secondary {
+      background: #2a2a2a;
+      color: #888;
+    }
+
+    .form-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
 </head>
 <body>
-    <!-- Шапка -->
-    <div class="header">
-        <h1>Сегодня</h1>
-        <div class="balance">
-            <span id="balance">125</span>
-            <div class="flower-icon">🌼</div>
+  <!-- Шапка -->
+  <div class="header">
+    <h1>Сегодня</h1>
+    <div class="balance" id="balance">
+      <span id="balanceAmount">125</span>
+      <span>🌼</span>
+    </div>
+  </div>
+
+  <!-- Календарь -->
+  <div class="calendar">
+    <div class="calendar-week" id="calendar"></div>
+  </div>
+
+  <!-- Контент -->
+  <div class="content">
+    <!-- Форма добавления привычки -->
+    <div class="habit-form" id="habitForm">
+      <div class="form-group">
+        <label class="form-label">Название привычки</label>
+        <input type="text" class="form-input" id="habitName" placeholder="Например: Утренняя зарядка">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Категория</label>
+        <input type="text" class="form-input" id="habitCategory" placeholder="Здоровье, Спорт...">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Награда (цветков)</label>
+        <input type="number" class="form-input" id="habitReward" value="5" min="1">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Цвет</label>
+        <div class="color-picker">
+          <div class="color-option selected" style="background: #4CAF50" data-color="#4CAF50"></div>
+          <div class="color-option" style="background: #2196F3" data-color="#2196F3"></div>
+          <div class="color-option" style="background: #f44336" data-color="#f44336"></div>
+          <div class="color-option" style="background: #FFC107" data-color="#FFC107"></div>
+          <div class="color-option" style="background: #9C27B0" data-color="#9C27B0"></div>
         </div>
+      </div>
+      
+      <div class="form-buttons">
+        <button class="form-btn secondary" id="cancelBtn">Отмена</button>
+        <button class="form-btn primary" id="createBtn">Создать</button>
+      </div>
     </div>
 
-    <!-- Календарь -->
-    <div class="calendar">
-        <div class="calendar-day past">
-            <div class="day-label">ПН</div>
-            <div class="day-number">31</div>
-        </div>
-        <div class="calendar-day past">
-            <div class="day-label">ВТ</div>
-            <div class="day-number">1</div>
-        </div>
-        <div class="calendar-day past">
-            <div class="day-label">СР</div>
-            <div class="day-number">2</div>
-        </div>
-        <div class="calendar-day today">
-            <div class="day-label">ЧТ</div>
-            <div class="day-number">3</div>
-        </div>
-        <div class="calendar-day">
-            <div class="day-label">ПТ</div>
-            <div class="day-number">4</div>
-        </div>
-        <div class="calendar-day">
-            <div class="day-label">СБ</div>
-            <div class="day-number">5</div>
-        </div>
-        <div class="calendar-day">
-            <div class="day-label">ВС</div>
-            <div class="day-number">6</div>
-        </div>
-    </div>
+    <!-- Список категорий и привычек -->
+    <div id="habitsList"></div>
+    
+    <!-- Кнопка добавления -->
+    <button class="add-habit-btn" id="addHabitBtn">+ добавить новую привычку</button>
+  </div>
 
-    <!-- Категория: Здоровье -->
-    <div class="category">
-        <div class="category-title">Здоровье</div>
+  <!-- Нижняя навигация -->
+  <div class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <div class="nav-icon">📅</div>
+      <div>Календарь</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div>Профиль</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">⚔️</div>
+      <div>Дуэль</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">🌳</div>
+      <div>Сад</div>
+    </a>
+  </div>
+
+  <!-- Модальное окно Спринта -->
+  <div class="modal" id="sprintModal">
+    <div class="modal-card">
+      <button class="modal-close" id="closeModal">✕</button>
+      <div class="sprint-header">
+        <div class="sprint-avatar">🦥</div>
+        <div class="sprint-badge">Спринт</div>
+      </div>
+      <p class="sprint-message" id="sprintMessage"></p>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Мотивационные фразы Спринта
+    const sprintMessages = [
+      "Эй! Твои растения вянут! 🌱 Полей их скорее!",
+      "Ленивиться хорошо, но не сегодня! 💪 Твой сад нуждается в тебе!",
+      "Стоп! Ещё один пропуск — и растение погибнет 😢",
+      "Твой сад грустит без тебя! Давай вернём ему жизнь 🌿",
+      "Ого! Кажется, кто-то решил отдохнуть? Но растения ждут! 🦥✨"
+    ];
+
+    // Эволюция растений
+    const plantStages = {
+      0: '🌾',  // семечко
+      1: '🌾',
+      2: '🌱',  // росток
+      3: '🌿',  // куст
+      4: '🌿',
+      5: '🌳'   // дерево
+    };
+
+    // Инициализация данных из LocalStorage
+    let data = {
+      balance: parseInt(localStorage.getItem('balance')) || 125,
+      habits: JSON.parse(localStorage.getItem('habits')) || [
+        {
+          id: 1,
+          name: 'Сон по режиму',
+          category: 'Здоровье',
+          reward: 5,
+          color: '#4CAF50',
+          streak: 2,
+          lastCompleted: null,
+          skips: 0,
+          weekSkips: 0
+        },
+        {
+          id: 2,
+          name: 'Прогулка',
+          category: 'Спорт',
+          reward: 5,
+          color: '#2196F3',
+          streak: 1,
+          lastCompleted: null,
+          skips: 0,
+          weekSkips: 0
+        },
+        {
+          id: 3,
+          name: 'Тренировка',
+          category: 'Спорт',
+          reward: 10,
+          color: '#f44336',
+          streak: 0,
+          lastCompleted: null,
+          skips: 0,
+          weekSkips: 0
+        }
+      ]
+    };
+
+    // Сохранение данных
+    function saveData() {
+      localStorage.setItem('balance', data.balance);
+      localStorage.setItem('habits', JSON.stringify(data.habits));
+    }
+
+    // Обновление баланса
+    function updateBalance(amount) {
+      data.balance += amount;
+      const balanceEl = document.getElementById('balanceAmount');
+      balanceEl.textContent = data.balance;
+      document.getElementById('balance').classList.add('bounce');
+      setTimeout(() => {
+        document.getElementById('balance').classList.remove('bounce');
+      }, 500);
+      saveData();
+    }
+
+    // Генерация календаря
+    function renderCalendar() {
+      const calendar = document.getElementById('calendar');
+      const today = new Date();
+      const dayNames = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+      
+      // Находим понедельник текущей недели
+      const currentDay = today.getDay();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+      
+      calendar.innerHTML = '';
+      
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
         
-        <div class="habit-card green">
-            <div class="habit-info">
-                <div class="habit-name">Сон по режиму</div>
-                <div class="habit-reward">+5 🌼</div>
-            </div>
-            <div class="habit-actions">
-                <div class="plant-icon">🌱</div>
-                <button class="check-btn" onclick="completeHabit(this)">✓</button>
-            </div>
-        </div>
-
-        <button class="add-habit-btn">+ добавить новую привычку</button>
-    </div>
-
-    <!-- Категория: Спорт -->
-    <div class="category">
-        <div class="category-title">Спорт</div>
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
         
-        <div class="habit-card green">
-            <div class="habit-info">
-                <div class="habit-name">Прогулка</div>
-                <div class="habit-reward">+5 🌼</div>
-            </div>
-            <div class="habit-actions">
-                <div class="plant-icon">🌱</div>
-                <button class="check-btn" onclick="completeHabit(this)">✓</button>
-            </div>
-        </div>
+        const isPast = date < today && date.toDateString() !== today.toDateString();
+        const isToday = date.toDateString() === today.toDateString();
+        const isFuture = date > today;
+        
+        let dayClass = 'past';
+        if (isToday) dayClass = 'today';
+        if (isFuture) dayClass = 'future';
+        
+        dayEl.innerHTML = `
+          <div class="day-name">${dayNames[date.getDay()]}</div>
+          <div class="day-number ${dayClass}">${date.getDate()}</div>
+        `;
+        
+        calendar.appendChild(dayEl);
+      }
+    }
 
-        <div class="habit-card blue">
-            <div class="habit-info">
-                <div class="habit-name">Тренировка</div>
-                <div class="habit-reward">+10 🌼</div>
-            </div>
-            <div class="habit-actions">
-                <div class="plant-icon">🌿</div>
-                <button class="check-btn" onclick="completeHabit(this)">✓</button>
-            </div>
-        </div>
-
-        <div class="habit-card red">
-            <div class="habit-info">
-                <div class="habit-name">Зарядка</div>
-                <div class="habit-reward">+5 🌼</div>
-            </div>
-            <div class="habit-actions">
-                <div class="plant-icon">🌳</div>
-                <button class="check-btn completed">✓</button>
-            </div>
-        </div>
-
-        <button class="add-habit-btn">+ добавить новую привычку</button>
-    </div>
-
-    <!-- Модальное окно (Спринт) -->
-    <div class="modal" id="sprintModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <img src="https://i.imgur.com/placeholder-sloth.png" alt="Спринт" class="sprint-avatar" style="display:none;">
-                <div style="font-size: 80px;">🦥</div>
-                <div class="sprint-name">Спринт</div>
-                <button class="close-modal" onclick="closeModal()">✕</button>
-            </div>
-            <div class="modal-body">
-                <p class="modal-text">Ты пропустил день...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Нижняя навигация -->
-    <div class="bottom-nav">
-        <a href="#calendar" class="nav-item active">
-            <div class="nav-icon">📅</div>
-            Календарь
-        </a>
-        <a href="#profile" class="nav-item">
-            <div class="nav-icon">👤</div>
-            Профиль
-        </a>
-        <a href="#duel" class="nav-item">
-            <div class="nav-icon">⚔️</div>
-            Дуэль
-        </a>
-        <a href="#garden" class="nav-item">
-            <div class="nav-icon">🌿</div>
-            Сад
-        </a>
-    </div>
-
-    <script>
-        // Инициализация Telegram Mini App
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // Баланс цветков
-        let balance = 125;
-
-        // Выполнить привычку
-        function completeHabit(btn) {
-            if (btn.classList.contains('completed')) return;
-
-            btn.classList.add('completed');
-            btn.style.background = '#6b7280';
-            
-            // Добавить цветки
-            const reward = parseInt(btn.closest('.habit-card').querySelector('.habit-reward').textContent);
-            balance += reward;
-            document.getElementById('balance').textContent = balance;
-
-            // Анимация
-            btn.style.transform = 'scale(1.2)';
-            setTimeout(() => {
-                btn.style.transform = 'scale(1)';
-            }, 200);
+    // Отрисовка привычек
+    function renderHabits() {
+      const container = document.getElementById('habitsList');
+      const categories = {};
+      
+      // Группировка по категориям
+      data.habits.forEach(habit => {
+        if (!categories[habit.category]) {
+          categories[habit.category] = [];
         }
+        categories[habit.category].push(habit);
+      });
+      
+      container.innerHTML = '';
+      
+      Object.keys(categories).forEach(categoryName => {
+        const categoryEl = document.createElement('div');
+        categoryEl.className = 'category';
+        
+        const titleEl = document.createElement('div');
+        titleEl.className = 'category-title';
+        titleEl.textContent = categoryName;
+        categoryEl.appendChild(titleEl);
+        
+        categories[categoryName].forEach(habit => {
+          const habitEl = document.createElement('div');
+          habitEl.className = 'habit-card';
+          habitEl.style.setProperty('--habit-color', habit.color);
+          
+          const today = new Date().toDateString();
+          const isCompleted = habit.lastCompleted === today;
+          const plantIcon = habit.skips >= 3 ? '🥀' : plantStages[Math.min(habit.streak, 5)];
+          
+          habitEl.innerHTML = `
+            <div class="habit-icon">${plantIcon}</div>
+            <div class="habit-info">
+              <div class="habit-name">${habit.name}</div>
+              <div class="habit-reward">+${habit.reward} 🌼</div>
+            </div>
+            <button class="habit-check ${isCompleted ? 'completed' : ''}" 
+                    data-id="${habit.id}"
+                    ${isCompleted ? 'disabled' : ''}>
+              ${isCompleted ? '✓' : '○'}
+            </button>
+          `;
+          
+          categoryEl.appendChild(habitEl);
+        });
+        
+        container.appendChild(categoryEl);
+      });
+      
+      // Обработчики кликов на кнопки выполнения
+      document.querySelectorAll('.habit-check').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const habitId = parseInt(this.dataset.id);
+          completeHabit(habitId);
+        });
+      });
+    }
 
-        // Открыть модалку Спринта
-        function showSprintModal(message) {
-            document.querySelector('.modal-text').textContent = message;
-            document.getElementById('sprintModal').classList.add('active');
+    // Выполнение привычки
+    function completeHabit(habitId) {
+      const habit = data.habits.find(h => h.id === habitId);
+      if (!habit) return;
+      
+      const today = new Date().toDateString();
+      
+      // Проверка - уже выполнена сегодня?
+      if (habit.lastCompleted === today) {
+        return;
+      }
+      
+      // Обновляем данные
+      habit.lastCompleted = today;
+      habit.streak++;
+      habit.weekSkips = 0; // Сброс пропусков недели
+      
+      // Начисление награды
+      updateBalance(habit.reward);
+      
+      saveData();
+      renderHabits();
+      
+      // Вибрация (если поддерживается)
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('medium');
+      }
+    }
+
+    // Проверка пропусков (вызывать раз в день)
+    function checkSkips() {
+      const today = new Date().toDateString();
+      
+      data.habits.forEach(habit => {
+        if (habit.lastCompleted !== today) {
+          habit.weekSkips++;
+          
+          // Если 3+ пропуска в неделю - показать Спринта
+          if (habit.weekSkips >= 3 && habit.skips < 3) {
+            showSprintModal();
+            habit.skips++;
+          }
         }
+      });
+      
+      saveData();
+    }
 
-        // Закрыть модалку
-        function closeModal() {
-            document.getElementById('sprintModal').classList.remove('active');
-        }
+    // Показ модалки Спринта
+    function showSprintModal() {
+      const modal = document.getElementById('sprintModal');
+      const message = document.getElementById('sprintMessage');
+      
+      const randomMessage = sprintMessages[Math.floor(Math.random() * sprintMessages.length)];
+      message.textContent = randomMessage;
+      
+      modal.classList.add('show');
+      
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred('warning');
+      }
+    }
 
-        // Пример: показать Спринта через 5 секунд (для теста)
-        // setTimeout(() => {
-        //     showSprintModal('Эй! Твои растения вянут! 🌱 Полей их скорее!');
-        // }, 5000);
-    </script>
+    // Закрытие модалки
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('sprintModal').classList.remove('show');
+    });
+
+    document.getElementById('sprintModal').addEventListener('click', (e) => {
+      if (e.target.id === 'sprintModal') {
+        document.getElementById('sprintModal').classList.remove('show');
+      }
+    });
+
+    // Форма добавления привычки
+    let selectedColor = '#4CAF50';
+
+    document.getElementById('addHabitBtn').addEventListener('click', () => {
+      document.getElementById('habitForm').classList.add('show');
+      document.getElementById('addHabitBtn').style.display = 'none';
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      document.getElementById('habitForm').classList.remove('show');
+      document.getElementById('addHabitBtn').style.display = 'block';
+    });
+
+    // Выбор цвета
+    document.querySelectorAll('.color-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedColor = this.dataset.color;
+      });
+    });
+
+    // Создание привычки
+    document.getElementById('createBtn').addEventListener('click', () => {
+      const name = document.getElementById('habitName').value.trim();
+      const category = document.getElementById('habitCategory').value.trim() || 'Другое';
+      const reward = parseInt(document.getElementById('habitReward').value) || 5;
+      
+      if (!name) {
+        alert('Введите название привычки!');
+        return;
+      }
+      
+      const newHabit = {
+        id: Date.now(),
+        name,
+        category,
+        reward,
+        color: selectedColor,
+        streak: 0,
+        lastCompleted: null,
+        skips: 0,
+        weekSkips: 0
+      };
+      
+      data.habits.push(newHabit);
+      saveData();
+      
+      // Очистка формы
+      document.getElementById('habitName').value = '';
+      document.getElementById('habitCategory').value = '';
+      document.getElementById('habitReward').value = '5';
+      document.getElementById('habitForm').classList.remove('show');
+      document.getElementById('addHabitBtn').style.display = 'block';
+      
+      renderHabits();
+      
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred('success');
+      }
+    });
+
+    // Инициализация
+    renderCalendar();
+    renderHabits();
+    
+    // Проверка пропусков при загрузке
+    checkSkips();
+
+    console.log('Sprint Mini App загружен ✅');
+    console.log('User ID:', tg.initDataUnsafe?.user?.id || 'Неизвестно');
+  </script>
 </body>
 </html>
