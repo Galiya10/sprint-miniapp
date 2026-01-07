@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сад Привычек</title>
+    <title>Спринт - Календарь</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Шрифт Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -13,225 +17,431 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
-            color: #2d3436;
+            font-family: 'Nunito', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
             min-height: 100vh;
-            padding: 20px;
+            padding: 20px 16px 80px;
         }
 
+        /* Шапка */
         .header {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: fadeIn 0.6s ease-in;
-        }
-
-        .logo {
-            font-size: 60px;
-            margin-bottom: 10px;
-            animation: bounce 2s ease-in-out infinite;
-        }
-
-        h1 {
-            font-size: 28px;
-            font-weight: 600;
-            color: #27ae60;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: #636e72;
-        }
-
-        .add-habit {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            animation: fadeIn 0.8s ease-in;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            color: #636e72;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #dfe6e9;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #27ae60;
-        }
-
-        .btn {
-            width: 100%;
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
-            transition: all 0.3s;
-        }
-
-        .btn:hover {
-            background: #229954;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .habits-list {
-            animation: fadeIn 1s ease-in;
-        }
-
-        .habit-card {
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            margin-bottom: 12px;
-            animation: slideIn 0.4s ease-out;
-        }
-
-        .habit-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .balance {
+            background: #2a2a2a;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .flower-icon {
+            width: 24px;
+            height: 24px;
+            background: #c8e67f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Календарь */
+        .calendar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            gap: 4px;
+        }
+
+        .calendar-day {
+            flex: 1;
+            text-align: center;
+        }
+
+        .day-label {
+            font-size: 12px;
+            color: #888888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .day-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #888888;
+        }
+
+        .calendar-day.past .day-number {
+            color: #ffffff;
+        }
+
+        .calendar-day.today {
+            position: relative;
+        }
+
+        .calendar-day.today .day-number {
+            color: #ffffff;
+            background: transparent;
+            border: 2px solid #c8e67f;
+            border-radius: 12px;
+            padding: 8px 12px;
+        }
+
+        /* Раздел (категория) */
+        .category {
+            margin-bottom: 24px;
+        }
+
+        .category-title {
+            font-size: 16px;
+            color: #888888;
             margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        /* Карточка привычки */
+        .habit-card {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid;
+            position: relative;
+        }
+
+        .habit-card.green { border-color: #4ade80; }
+        .habit-card.blue { border-color: #60a5fa; }
+        .habit-card.red { border-color: #f87171; }
+        .habit-card.yellow { border-color: #fbbf24; }
+
+        .habit-info {
+            flex: 1;
         }
 
         .habit-name {
             font-size: 18px;
-            font-weight: 600;
-            color: #2d3436;
+            font-weight: 700;
+            margin-bottom: 6px;
         }
 
-        .habit-day {
+        .habit-reward {
             font-size: 14px;
-            color: #27ae60;
+            color: #c8e67f;
             font-weight: 600;
-            background: #e8f5e9;
-            padding: 4px 12px;
-            border-radius: 20px;
         }
 
-        .habit-progress {
-            width: 100%;
-            height: 8px;
-            background: #dfe6e9;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 12px;
+        .habit-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #27ae60, #2ecc71);
-            border-radius: 10px;
-            transition: width 0.5s ease;
+        .plant-icon {
+            width: 48px;
+            height: 48px;
+            background: #2a2a2a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
         }
 
-        .water-btn {
-            width: 100%;
-            background: #3498db;
-            color: white;
+        .check-btn {
+            width: 48px;
+            height: 48px;
+            background: #4ade80;
             border: none;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        .water-btn:hover {
-            background: #2980b9;
+        .check-btn:hover {
+            transform: scale(1.1);
         }
 
-        .water-btn.watered {
-            background: #95a5a6;
+        .check-btn.completed {
+            background: #6b7280;
             cursor: not-allowed;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #636e72;
-        }
-
-        .empty-state .icon {
-            font-size: 60px;
+        /* Кнопка добавления */
+        .add-habit-btn {
+            width: 100%;
+            background: #2a2a2a;
+            color: #666666;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
             margin-bottom: 16px;
-            opacity: 0.3;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Модальное окно (Спринт) */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .modal.active {
+            display: flex;
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+        .modal-content {
+            background: #2a2a2a;
+            border-radius: 24px;
+            padding: 0;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: #3a3a3a;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .sprint-avatar {
+            width: 120px;
+            height: 120px;
+        }
+
+        .sprint-name {
+            background: #4ade80;
+            color: #000000;
+            padding: 8px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            background: #4a4a4a;
+            border: none;
+            border-radius: 50%;
+            color: #c8e67f;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .modal-text {
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        /* Нижняя навигация */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a1a1a;
+            border-top: 1px solid #2a2a2a;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            color: #666666;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-item.active {
+            color: #c8e67f;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
         }
     </style>
 </head>
 <body>
     <!-- Шапка -->
     <div class="header">
-        <div class="logo">🦥</div>
-        <h1>Сад Привычек</h1>
-        <div class="subtitle">Выращивай полезные привычки каждый день!</div>
+        <h1>Сегодня</h1>
+        <div class="balance">
+            <span id="balance">125</span>
+            <div class="flower-icon">🌼</div>
+        </div>
     </div>
 
-    <!-- Форма добавления привычки -->
-    <div class="add-habit">
-        <div class="input-group">
-            <label for="habitInput">Какую привычку хочешь вырастить?</label>
-            <input 
-                type="text" 
-                id="habitInput" 
-                placeholder="Например: Зарядка 10 минут"
-                maxlength="50"
-            >
+    <!-- Календарь -->
+    <div class="calendar">
+        <div class="calendar-day past">
+            <div class="day-label">ПН</div>
+            <div class="day-number">31</div>
         </div>
-        <button class="btn" onclick="addHabit()">🌱 Посадить привычку</button>
+        <div class="calendar-day past">
+            <div class="day-label">ВТ</div>
+            <div class="day-number">1</div>
+        </div>
+        <div class="calendar-day past">
+            <div class="day-label">СР</div>
+            <div class="day-number">2</div>
+        </div>
+        <div class="calendar-day today">
+            <div class="day-label">ЧТ</div>
+            <div class="day-number">3</div>
+        </div>
+        <div class="calendar-day">
+            <div class="day-label">ПТ</div>
+            <div class="day-number">4</div>
+        </div>
+        <div class="calendar-day">
+            <div class="day-label">СБ</div>
+            <div class="day-number">5</div>
+        </div>
+        <div class="calendar-day">
+            <div class="day-label">ВС</div>
+            <div class="day-number">6</div>
+        </div>
     </div>
 
-    <!-- Список привычек -->
-    <div class="habits-list" id="habitsList">
-        <div class="empty-state">
-            <div class="icon">🌿</div>
-            <p>Твой сад пока пуст.<br>Посади первую привычку!</p>
+    <!-- Категория: Здоровье -->
+    <div class="category">
+        <div class="category-title">Здоровье</div>
+        
+        <div class="habit-card green">
+            <div class="habit-info">
+                <div class="habit-name">Сон по режиму</div>
+                <div class="habit-reward">+5 🌼</div>
+            </div>
+            <div class="habit-actions">
+                <div class="plant-icon">🌱</div>
+                <button class="check-btn" onclick="completeHabit(this)">✓</button>
+            </div>
         </div>
+
+        <button class="add-habit-btn">+ добавить новую привычку</button>
+    </div>
+
+    <!-- Категория: Спорт -->
+    <div class="category">
+        <div class="category-title">Спорт</div>
+        
+        <div class="habit-card green">
+            <div class="habit-info">
+                <div class="habit-name">Прогулка</div>
+                <div class="habit-reward">+5 🌼</div>
+            </div>
+            <div class="habit-actions">
+                <div class="plant-icon">🌱</div>
+                <button class="check-btn" onclick="completeHabit(this)">✓</button>
+            </div>
+        </div>
+
+        <div class="habit-card blue">
+            <div class="habit-info">
+                <div class="habit-name">Тренировка</div>
+                <div class="habit-reward">+10 🌼</div>
+            </div>
+            <div class="habit-actions">
+                <div class="plant-icon">🌿</div>
+                <button class="check-btn" onclick="completeHabit(this)">✓</button>
+            </div>
+        </div>
+
+        <div class="habit-card red">
+            <div class="habit-info">
+                <div class="habit-name">Зарядка</div>
+                <div class="habit-reward">+5 🌼</div>
+            </div>
+            <div class="habit-actions">
+                <div class="plant-icon">🌳</div>
+                <button class="check-btn completed">✓</button>
+            </div>
+        </div>
+
+        <button class="add-habit-btn">+ добавить новую привычку</button>
+    </div>
+
+    <!-- Модальное окно (Спринт) -->
+    <div class="modal" id="sprintModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img src="https://i.imgur.com/placeholder-sloth.png" alt="Спринт" class="sprint-avatar" style="display:none;">
+                <div style="font-size: 80px;">🦥</div>
+                <div class="sprint-name">Спринт</div>
+                <button class="close-modal" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text">Ты пропустил день...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <a href="#calendar" class="nav-item active">
+            <div class="nav-icon">📅</div>
+            Календарь
+        </a>
+        <a href="#profile" class="nav-item">
+            <div class="nav-icon">👤</div>
+            Профиль
+        </a>
+        <a href="#duel" class="nav-item">
+            <div class="nav-icon">⚔️</div>
+            Дуэль
+        </a>
+        <a href="#garden" class="nav-item">
+            <div class="nav-icon">🌿</div>
+            Сад
+        </a>
     </div>
 
     <script>
@@ -239,114 +449,43 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Получить данные из LocalStorage
-        let habits = JSON.parse(localStorage.getItem('habits')) || [];
+        // Баланс цветков
+        let balance = 125;
 
-        // Отобразить привычки при загрузке
-        renderHabits();
+        // Выполнить привычку
+        function completeHabit(btn) {
+            if (btn.classList.contains('completed')) return;
 
-        // Функция добавления привычки
-        function addHabit() {
-            const input = document.getElementById('habitInput');
-            const habitName = input.value.trim();
+            btn.classList.add('completed');
+            btn.style.background = '#6b7280';
+            
+            // Добавить цветки
+            const reward = parseInt(btn.closest('.habit-card').querySelector('.habit-reward').textContent);
+            balance += reward;
+            document.getElementById('balance').textContent = balance;
 
-            if (habitName === '') {
-                tg.showAlert('Введи название привычки!');
-                return;
-            }
-
-            // Создать новую привычку
-            const newHabit = {
-                id: Date.now(),
-                name: habitName,
-                day: 1,
-                lastWatered: null,
-                createdAt: new Date().toISOString()
-            };
-
-            habits.push(newHabit);
-            localStorage.setItem('habits', JSON.stringify(habits));
-
-            // Очистить поле ввода
-            input.value = '';
-
-            // Обновить список
-            renderHabits();
-
-            // Уведомление
-            tg.showPopup({
-                message: `🌱 Привычка "${habitName}" посажена!`,
-                buttons: [{type: 'ok'}]
-            });
+            // Анимация
+            btn.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 200);
         }
 
-        // Функция отображения привычек
-        function renderHabits() {
-            const container = document.getElementById('habitsList');
-
-            if (habits.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">🌿</div>
-                        <p>Твой сад пока пуст.<br>Посади первую привычку!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = habits.map(habit => {
-                const progress = (habit.day / 30) * 100;
-                const today = new Date().toDateString();
-                const lastWatered = habit.lastWatered ? new Date(habit.lastWatered).toDateString() : null;
-                const isWateredToday = lastWatered === today;
-
-                return `
-                    <div class="habit-card">
-                        <div class="habit-header">
-                            <div class="habit-name">${habit.name}</div>
-                            <div class="habit-day">День ${habit.day}/30</div>
-                        </div>
-                        <div class="habit-progress">
-                            <div class="progress-bar" style="width: ${progress}%"></div>
-                        </div>
-                        <button 
-                            class="water-btn ${isWateredToday ? 'watered' : ''}" 
-                            onclick="waterHabit(${habit.id})"
-                            ${isWateredToday ? 'disabled' : ''}
-                        >
-                            ${isWateredToday ? '✅ Полито сегодня' : '💧 Полить'}
-                        </button>
-                    </div>
-                `;
-            }).join('');
+        // Открыть модалку Спринта
+        function showSprintModal(message) {
+            document.querySelector('.modal-text').textContent = message;
+            document.getElementById('sprintModal').classList.add('active');
         }
 
-        // Функция полива привычки
-        function waterHabit(habitId) {
-            const habit = habits.find(h => h.id === habitId);
-            if (!habit) return;
-
-            // Обновить день и дату полива
-            habit.day += 1;
-            habit.lastWatered = new Date().toISOString();
-
-            // Проверить, достиг ли 30 дней
-            if (habit.day > 30) {
-                tg.showPopup({
-                    message: `🎉 Поздравляю! Привычка "${habit.name}" укоренилась!`,
-                    buttons: [{type: 'ok'}]
-                });
-                // Можно удалить привычку или оставить
-            }
-
-            localStorage.setItem('habits', JSON.stringify(habits));
-            renderHabits();
+        // Закрыть модалку
+        function closeModal() {
+            document.getElementById('sprintModal').classList.remove('active');
         }
 
-        // Отправить данные в бота (для будущей интеграции с БД)
-        function sendDataToBot() {
-            tg.sendData(JSON.stringify({habits: habits}));
-        }
+        // Пример: показать Спринта через 5 секунд (для теста)
+        // setTimeout(() => {
+        //     showSprintModal('Эй! Твои растения вянут! 🌱 Полей их скорее!');
+        // }, 5000);
     </script>
 </body>
 </html>
