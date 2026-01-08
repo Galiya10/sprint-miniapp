@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -8,267 +9,224 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <style>
-    :root {
-      --bg-color: #000000;
-      --card-bg: #151517;
-      --text-main: #FFFFFF;
-      --text-secondary: #8E8E93;
-      --accent: #A4E34E;
-    }
-
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Nunito', sans-serif; }
 
     body {
-      background: var(--bg-color);
-      color: var(--text-main);
-      padding-bottom: 90px;
-      /* Динамический отступ для Telegram Android */
-      padding-top: 20px; 
-    }
-    
-    /* Если открыто в Telegram, добавляем отступ сверху */
-    body.telegram-app {
-       padding-top: 80px;
+      background: #2C3E50;
+      color: #FFFFFF;
+      padding: 20px 16px 90px;
+      min-height: 100vh;
     }
 
     /* ШАПКА */
     .header {
-      padding: 0 20px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 24px;
     }
 
     .header h1 {
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 800;
-      letter-spacing: 0.5px;
+      color: #fff;
     }
 
     .balance {
-      background: #2C2C2E;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 17px;
+      font-size: 20px;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
 
-    /* КАЛЕНДАРЬ С НАВИГАЦИЕЙ */
-    .calendar-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px 24px;
-    }
-
-    .nav-arrow {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 24px;
-      padding: 10px;
-      cursor: pointer;
-    }
-
+    /* КАЛЕНДАРЬ */
     .calendar-week {
       display: flex;
       justify-content: space-between;
-      flex: 1;
-      padding: 0 10px;
+      margin-bottom: 32px;
     }
 
     .calendar-day {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      position: relative;
+      gap: 6px;
     }
 
     .day-name {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 700;
-      text-transform: uppercase;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 600;
     }
 
     .day-number {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
-      color: var(--text-main);
-      transition: all 0.2s;
+      color: #fff;
     }
 
-    /* Стиль выбранного дня */
-    .calendar-day.selected .day-number {
-      background: #FFFFFF;
-      color: #000000;
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
-    }
-    
-    /* Стиль "Сегодня", если не выбран */
-    .calendar-day.is-today:not(.selected) .day-number {
-      color: var(--accent);
-      border: 2px solid rgba(164, 227, 78, 0.3);
+    .day-number.today {
+      border: 2px solid #D4AF37;
     }
 
-    /* Индикатор наличия записей в этот день */
-    .has-data-dot {
-      width: 4px;
-      height: 4px;
-      background: var(--accent);
-      border-radius: 50%;
-      position: absolute;
-      bottom: -6px;
-      display: none;
+    .day-number.past {
+      color: rgba(255, 255, 255, 0.3);
     }
-    .has-data .has-data-dot { display: block; }
 
-    /* КАРТОЧКИ */
-    .content { padding: 0 16px; }
+    .day-number.future {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* СПИСОК ПРИВЫЧЕК */
+    .category {
+      margin-bottom: 24px;
+    }
 
     .category-title {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin: 24px 0 12px;
+      font-size: 18px;
       font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
       padding-left: 4px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
     }
 
     .habit-card {
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 18px;
+      background: #34495E;
+      border-radius: 16px;
+      padding: 16px 20px;
       margin-bottom: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
-      /* Современная тонкая обводка */
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-      transition: transform 0.1s;
-    }
-    
-    /* Цветной акцент слева */
-    .habit-card::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 18px; bottom: 18px;
-      width: 4px;
-      background: var(--habit-color);
-      border-radius: 0 4px 4px 0;
-      opacity: 0.8;
-    }
-
-    .habit-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding-left: 8px;
-    }
-
-    .habit-icon-circle {
-      width: 42px;
-      height: 42px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
     }
 
     .habit-info h3 {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
       margin-bottom: 4px;
+      color: #fff;
     }
 
     .habit-reward {
-      font-size: 13px;
-      color: var(--text-secondary);
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    /* СОВРЕМЕННАЯ ГАЛОЧКА */
-    .check-btn {
+    /* КНОПКА ПЛЮС (круг с обводкой) */
+    .habit-btn {
       width: 48px;
       height: 48px;
-      border-radius: 16px;
+      border-radius: 50%;
       background: transparent;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      color: transparent;
+      border: 2px solid #D4AF37;
+      color: #D4AF37;
+      font-size: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: all 0.2s;
+      font-weight: 300;
     }
 
-    .check-btn svg {
-      width: 24px;
-      height: 24px;
-      stroke-width: 3;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-      stroke: #000;
-      transform: scale(0);
-      transition: transform 0.2s;
-    }
-
-    .check-btn.completed {
-      background: var(--habit-color);
-      border-color: var(--habit-color);
-    }
-    
-    .check-btn.completed svg {
-      transform: scale(1);
+    .habit-btn.completed {
+      background: #D4AF37;
+      color: #2C3E50;
     }
 
     /* КНОПКА ДОБАВИТЬ */
     .add-btn {
       width: 100%;
       padding: 18px;
-      background: #1C1C1E;
-      border-radius: 20px;
-      color: var(--text-secondary);
+      background: #34495E;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.7);
       font-size: 16px;
-      font-weight: 700;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      margin-top: 24px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    /* СПРИНТ (когда список пуст) */
+    .sprint-welcome {
+      position: fixed;
+      bottom: 90px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      z-index: 50;
+    }
+
+    .sprint-avatar {
+      width: 80px;
+      height: 80px;
+      font-size: 70px;
+      flex-shrink: 0;
+    }
+
+    .sprint-bubble {
+      background: #A4E34E;
+      color: #000;
+      padding: 12px 16px;
+      border-radius: 20px 20px 20px 4px;
+      position: relative;
+      max-width: 240px;
+    }
+
+    .sprint-name {
+      font-weight: 800;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .sprint-text {
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .close-sprint {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #2C3E50;
+      border: none;
+      color: #fff;
+      font-size: 16px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
     }
 
-    /* НАВИГАЦИЯ */
+    /* НИЖНЯЯ ПАНЕЛЬ */
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      background: rgba(10, 10, 10, 0.9);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 12px 0 30px;
+      background: #2C3E50;
+      padding: 12px 0 24px;
       display: flex;
       justify-content: space-around;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       z-index: 100;
     }
 
@@ -276,156 +234,169 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
-      color: #555;
-      font-size: 11px;
-      font-weight: 700;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 12px;
+      font-weight: 600;
       text-decoration: none;
     }
 
-    .nav-item.active { color: #fff; }
-    .nav-icon { font-size: 22px; }
+    .nav-item.active {
+      color: #D4AF37;
+    }
 
-    /* ФОРМА (Пастельные тона) */
-    .modal-overlay {
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* МОДАЛКА */
+    .modal {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(5px);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
       z-index: 200;
       display: none;
       align-items: flex-end;
     }
-    
-    .modal-overlay.open { display: flex; }
 
-    .modal-sheet {
-      background: #1C1C1E;
+    .modal.open { display: flex; }
+
+    .modal-content {
+      background: #E8E8E8;
       width: 100%;
-      border-radius: 32px 32px 0 0;
-      padding: 32px 24px 50px;
-      animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      animation: slideUp 0.3s;
+      color: #000;
     }
 
     @keyframes slideUp { from {transform: translateY(100%)} to {transform: translateY(0)} }
 
-    input, select {
+    .modal-content h2 {
+      margin-bottom: 20px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .modal-content input {
       width: 100%;
-      background: #2C2C2E;
+      padding: 16px;
+      background: #fff;
       border: none;
-      padding: 18px;
-      border-radius: 16px;
-      color: #fff;
-      font-size: 17px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #000;
+    }
+
+    .modal-content select {
+      width: 100%;
+      padding: 16px;
+      background: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
       font-weight: 600;
       margin-bottom: 16px;
-      outline: none;
-    }
-
-    /* Палитра пастельных цветов */
-    .color-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .color-dot {
-      width: 100%;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      cursor: pointer;
-      position: relative;
-    }
-    
-    .color-dot.selected::after {
-      content: '';
-      position: absolute;
-      top: -3px; right: -3px; bottom: -3px; left: -3px;
-      border: 2px solid #fff;
-      border-radius: 50%;
+      color: #000;
     }
 
     .save-btn {
       width: 100%;
-      background: #fff;
+      padding: 16px;
+      background: #D4AF37;
       color: #000;
-      padding: 18px;
-      border-radius: 20px;
-      font-weight: 800;
-      font-size: 17px;
       border: none;
-      margin-top: 8px;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      width: 100%;
+      padding: 14px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
     }
   </style>
 </head>
-<body class="telegram-app">
+<body>
 
   <!-- Шапка -->
   <div class="header">
     <h1>Сегодня</h1>
     <div class="balance">
       <span id="balanceVal">0</span>
-      <span style="color: #FFD700">🌼</span>
+      <span>🌼</span>
     </div>
   </div>
 
   <!-- Календарь -->
-  <div class="calendar-container">
-    <button class="nav-arrow" onclick="changeWeek(-1)">‹</button>
-    <div class="calendar-week" id="calendar"></div>
-    <button class="nav-arrow" onclick="changeWeek(1)">›</button>
-  </div>
+  <div class="calendar-week" id="calendar"></div>
 
   <!-- Список привычек -->
-  <div class="content" id="habitsList"></div>
-  
-  <div class="content">
-    <button class="add-btn" onclick="openForm()">
-      <span>+</span> Новая привычка
-    </button>
+  <div id="habitsList"></div>
+
+  <!-- Кнопка добавить (показывается всегда) -->
+  <button class="add-btn" onclick="openModal()">+ добавить новую привычку</button>
+
+  <!-- Спринт (показывается только когда список пуст) -->
+  <div class="sprint-welcome" id="sprintWelcome" style="display: none;">
+    <div class="sprint-avatar">🦥</div>
+    <div class="sprint-bubble">
+      <button class="close-sprint" onclick="closeSprint()">✕</button>
+      <div class="sprint-name">Спринт</div>
+      <div class="sprint-text">Привет! Я Спринт, твой садовник привычек. Посади свою первую привычку - поливать будем вместе</div>
+    </div>
   </div>
 
-  <!-- Навигация -->
+  <!-- Нижняя навигация -->
   <div class="bottom-nav">
-    <a href="#" class="nav-item active"><span class="nav-icon">📅</span>Календарь</a>
-    <a href="#" class="nav-item"><span class="nav-icon">👤</span>Профиль</a>
-    <a href="#" class="nav-item"><span class="nav-icon">⚔️</span>Дуэль</a>
-    <a href="#" class="nav-item"><span class="nav-icon">🌳</span>Сад</a>
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>сегодня</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>дуэль</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"/></svg>
+      <span>сад</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>история</span>
+    </a>
   </div>
 
-  <!-- Форма добавления -->
-  <div class="modal-overlay" id="formModal">
-    <div class="modal-sheet">
-      <h2 style="margin-bottom: 24px; font-weight:800; font-size: 24px;">Создать привычку</h2>
-      
-      <input type="text" id="habitName" placeholder="Название (например: Бег)">
-      
+  <!-- Модалка -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2>Создать привычку</h2>
+      <input type="text" id="habitName" placeholder="Название">
       <select id="habitCategory">
-        <option value="Здоровье">Здоровье</option>
-        <option value="Спорт">Спорт</option>
-        <option value="Обучение">Обучение</option>
-        <option value="Творчество">Творчество</option>
+        <option>Здоровье</option>
+        <option>Спорт</option>
+        <option>Обучение</option>
+        <option>Творчество</option>
       </select>
-      
-      <label style="color:#888; font-size:13px; font-weight:700; margin-bottom:12px; display:block; text-transform:uppercase">Выберите цвет</label>
-      
-      <div class="color-grid">
-        <!-- Пастельные тона -->
-        <div class="color-dot" style="background:#A4E34E" onclick="selectColor('#A4E34E', this)"></div> <!-- Лайм -->
-        <div class="color-dot" style="background:#98FB98" onclick="selectColor('#98FB98', this)"></div> <!-- Мятный -->
-        <div class="color-dot" style="background:#87CEEB" onclick="selectColor('#87CEEB', this)"></div> <!-- Небо -->
-        <div class="color-dot" style="background:#DDA0DD" onclick="selectColor('#DDA0DD', this)"></div> <!-- Слива -->
-        <div class="color-dot" style="background:#FFB6C1" onclick="selectColor('#FFB6C1', this)"></div> <!-- Розовый -->
-        <div class="color-dot" style="background:#FFD700" onclick="selectColor('#FFD700', this)"></div> <!-- Золото -->
-        <div class="color-dot" style="background:#FFA07A" onclick="selectColor('#FFA07A', this)"></div> <!-- Лосось -->
-        <div class="color-dot" style="background:#20B2AA" onclick="selectColor('#20B2AA', this)"></div> <!-- Морской -->
-        <div class="color-dot" style="background:#B0C4DE" onclick="selectColor('#B0C4DE', this)"></div> <!-- Сталь -->
-        <div class="color-dot" style="background:#F0E68C" onclick="selectColor('#F0E68C', this)"></div> <!-- Хаки -->
-      </div>
-      
+      <input type="number" id="habitReward" value="5" placeholder="Награда (цветков)">
       <button class="save-btn" onclick="saveHabit()">Сохранить</button>
-      <button onclick="closeForm()" style="width:100%; background:none; border:none; color:#555; padding:15px; font-weight:600">Отмена</button>
+      <button class="cancel-btn" onclick="closeModal()">Отмена</button>
     </div>
   </div>
 
@@ -433,209 +404,152 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Отступ для Telegram
-    if (tg.platform) {
-        document.body.classList.add('telegram-app');
-    }
-
-    // Инициализация
     let habits = JSON.parse(localStorage.getItem('habits')) || [];
     let balance = parseInt(localStorage.getItem('balance')) || 0;
-    let selectedColor = '#A4E34E';
-    let currentWeekOffset = 0; // Смещение недель (0 = текущая)
-    let selectedDate = new Date(); // Выбранная дата в календаре (по умолчанию сегодня)
+    let selectedDate = new Date();
 
-    // Рендер календаря
+    // Календарь
     function renderCalendar() {
-      const days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+      const days = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
       const container = document.getElementById('calendar');
-      
-      // Вычисляем понедельник выбранной недели
       const today = new Date();
-      const currentDayOfWeek = (today.getDay() + 6) % 7; 
+      const dayOfWeek = (today.getDay() + 6) % 7;
       const monday = new Date(today);
-      monday.setDate(today.getDate() - currentDayOfWeek + (currentWeekOffset * 7));
+      monday.setDate(today.getDate() - dayOfWeek);
       
       let html = '';
       for (let i = 0; i < 7; i++) {
         const date = new Date(monday);
         date.setDate(monday.getDate() + i);
+        const isToday = date.toDateString() === today.toDateString();
+        const isPast = date < today && !isToday;
+        const isFuture = date > today;
         
-        const dateString = date.toDateString();
-        const isToday = date.toDateString() === new Date().toDateString();
-        const isSelected = date.toDateString() === selectedDate.toDateString();
+        let cls = '';
+        if (isToday) cls = 'today';
+        else if (isPast) cls = 'past';
+        else if (isFuture) cls = 'future';
         
-        // Проверяем, есть ли выполненные привычки в этот день
-        const hasData = habits.some(h => {
-             // Проверяем историю выполнения (надо доработать структуру для истории, 
-             // но пока проверяем lastCompleted для упрощения или заглушку)
-             return h.lastCompleted === dateString; 
-        });
-
         html += `
-          <div class="calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'is-today' : ''} ${hasData ? 'has-data' : ''}" 
-               onclick="selectDate('${date}')">
+          <div class="calendar-day">
             <span class="day-name">${days[i]}</span>
-            <div class="day-number">${date.getDate()}</div>
-            <div class="has-data-dot"></div>
+            <div class="day-number ${cls}">${date.getDate()}</div>
           </div>
         `;
       }
       container.innerHTML = html;
-      
-      // Обновляем заголовок "Сегодня" на дату, если выбрано не сегодня
-      const headerTitle = document.querySelector('.header h1');
-      if (selectedDate.toDateString() === new Date().toDateString()) {
-          headerTitle.innerText = "Сегодня";
-      } else {
-          const options = { day: 'numeric', month: 'long' };
-          headerTitle.innerText = selectedDate.toLocaleDateString('ru-RU', options);
-      }
     }
 
-    // Смена недели
-    window.changeWeek = (offset) => {
-      currentWeekOffset += offset;
-      renderCalendar();
-    };
-
-    // Выбор даты
-    window.selectDate = (dateStr) => {
-      selectedDate = new Date(dateStr);
-      renderCalendar();
-      renderHabits(); // Перерисовываем список под выбранную дату
-    };
-
-    // Рендер списка привычек (ФИЛЬТРАЦИЯ ПО ДАТЕ)
+    // Рендер привычек
     function renderHabits() {
       const list = document.getElementById('habitsList');
       document.getElementById('balanceVal').innerText = balance;
       
       if (habits.length === 0) {
-        list.innerHTML = '<div style="text-align:center; color:#333; margin-top:40px; font-weight:600">Сад пуст 🌱<br>Добавь первую привычку!</div>';
+        list.innerHTML = '';
+        document.getElementById('sprintWelcome').style.display = 'flex';
         return;
       }
-
+      
+      document.getElementById('sprintWelcome').style.display = 'none';
+      
       const grouped = {};
       habits.forEach(h => {
-        if (!h) return;
         if (!grouped[h.category]) grouped[h.category] = [];
         grouped[h.category].push(h);
       });
-
+      
       let html = '';
-      const viewDateStr = selectedDate.toDateString();
-
       for (const cat in grouped) {
+        html += `<div class="category">`;
         html += `<div class="category-title">${cat}</div>`;
+        
         grouped[cat].forEach(h => {
-          // Проверяем, выполнена ли привычка в ВЫБРАННУЮ дату
-          // Для этого нам нужно хранить массив дат выполнения (history), а не только lastCompleted
-          // НО! Чтобы не ломать твою старую структуру, используем пока простую логику:
-          // Если дата == сегодня, смотрим lastCompleted. Если прошлое - пока просто визуально даем возможность нажать.
-          // В идеале надо добавить поле history: ['DateString1', 'DateString2']
-          
-          // Адаптация под историю (если её нет, создаем на лету)
           if (!h.history) h.history = [];
-          if (h.lastCompleted && !h.history.includes(h.lastCompleted)) h.history.push(h.lastCompleted);
-
-          const isDone = h.history.includes(viewDateStr);
+          const dateStr = selectedDate.toDateString();
+          const isDone = h.history.includes(dateStr);
           
-          let icon = ''; 
-          if (h.streak > 5) icon = '🌳';
-          else if (h.streak > 2) icon = '🌿';
-          else if (h.streak >= 1) icon = '🌱';
-          else icon = ''; 
-
           html += `
-            <div class="habit-card" style="--habit-color: ${h.color}">
-              <div class="habit-left">
-                <div class="habit-icon-circle">${icon}</div>
-                <div class="habit-info">
-                  <h3>${h.name}</h3>
-                  <div class="habit-reward">+5 🌼</div>
-                </div>
+            <div class="habit-card">
+              <div class="habit-info">
+                <h3>${h.name}</h3>
+                <div class="habit-reward">${h.reward} 🌼</div>
               </div>
-              <button class="check-btn ${isDone ? 'completed' : ''}" 
-                      onclick="toggleHabit(${h.id})">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <button class="habit-btn ${isDone ? 'completed' : ''}" onclick="toggleHabit(${h.id})">
+                ${isDone ? '✓' : '+'}
               </button>
             </div>
           `;
         });
+        
+        html += `<button class="add-btn" onclick="openModal('${cat}')">+ добавить свою привычку</button>`;
+        html += `</div>`;
       }
+      
+      html += `<button class="add-btn" onclick="openModal('new')">Своя категория</button>`;
+      
       list.innerHTML = html;
     }
 
-    // Выполнение привычки (с поддержкой старых дат)
+    // Выполнение привычки
     window.toggleHabit = function(id) {
       const habit = habits.find(h => h.id === id);
       const dateStr = selectedDate.toDateString();
       
-      // Инициализируем историю, если нет
       if (!habit.history) habit.history = [];
-
+      
       if (!habit.history.includes(dateStr)) {
-        // Выполняем
         habit.history.push(dateStr);
-        habit.lastCompleted = dateStr; // Для совместимости
-        
-        // Увеличиваем стрик только если это сегодня или вчера
-        const today = new Date();
-        const diffTime = Math.abs(today - selectedDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-        if (diffDays <= 2) habit.streak++;
-        
-        balance += 5;
+        balance += habit.reward;
         tg.HapticFeedback.notificationOccurred('success');
       } else {
-        // Отменяем
         habit.history = habit.history.filter(d => d !== dateStr);
-        if (habit.streak > 0) habit.streak--;
-        balance -= 5;
+        balance -= habit.reward;
       }
-
-      saveAndRender();
-      renderCalendar(); // Обновляем точки в календаре
+      
+      save();
     };
 
-    // Форма
-    window.openForm = () => document.getElementById('formModal').classList.add('open');
-    window.closeForm = () => document.getElementById('formModal').classList.remove('open');
+    // Модалка
+    window.openModal = (cat) => {
+      document.getElementById('modal').classList.add('open');
+      if (cat && cat !== 'new') {
+        document.getElementById('habitCategory').value = cat;
+      }
+    };
     
-    window.selectColor = (color, el) => {
-      selectedColor = color;
-      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
-      el.classList.add('selected');
-    };
-
+    window.closeModal = () => document.getElementById('modal').classList.remove('open');
+    
     window.saveHabit = () => {
-      const name = document.getElementById('habitName').value;
+      const name = document.getElementById('habitName').value.trim();
       const cat = document.getElementById('habitCategory').value;
+      const reward = parseInt(document.getElementById('habitReward').value) || 5;
+      
       if (!name) return;
-
+      
       habits.push({
         id: Date.now(),
-        name: name,
+        name,
         category: cat,
-        color: selectedColor,
-        streak: 0,
-        lastCompleted: null,
-        history: [] // Новое поле для хранения истории дат
+        reward,
+        history: []
       });
-
-      closeForm();
+      
       document.getElementById('habitName').value = '';
-      saveAndRender();
+      closeModal();
+      save();
     };
 
-    function saveAndRender() {
+    window.closeSprint = () => {
+      document.getElementById('sprintWelcome').style.display = 'none';
+    };
+
+    function save() {
       localStorage.setItem('habits', JSON.stringify(habits));
       localStorage.setItem('balance', balance);
       renderHabits();
     }
 
-    // Старт
     renderCalendar();
     renderHabits();
   </script>
