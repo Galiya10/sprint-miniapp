@@ -1,39 +1,58 @@
-// Инициализация Telegram WebApp
+// ========== ИНИЦИАЛИЗАЦИЯ TELEGRAM WEB APP ==========
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
 
-// Применяем тему Telegram
-document.body.style.backgroundColor = tg.themeParams.bg_color || '#2C3E50';
+// Применяем цветовую схему Telegram
+if (tg.themeParams.bg_color) {
+    document.documentElement.style.setProperty('--bg-primary', tg.themeParams.bg_color);
+}
 
 // Получаем данные пользователя
 const user = tg.initDataUnsafe.user;
 const userId = user?.id || 'demo';
 const userName = user?.first_name || 'Пользователь';
 
-console.log('User:', userName, 'ID:', userId);
+console.log('👤 Пользователь:', userName, 'ID:', userId);
 
-// API endpoint (замените на ваш реальный URL)
-const API_URL = 'https://your-backend.com/api';
-
-// Состояние приложения
+// ========== СОСТОЯНИЕ ПРИЛОЖЕНИЯ ==========
 const state = {
     currentDate: new Date(),
     selectedDate: new Date(),
-    habits: [],
-    userProgress: {}
+    habits: []
 };
 
-// ============= ИНИЦИАЛИЗАЦИЯ =============
+// ========== ДЕМО-ДАННЫЕ ПРИВЫЧЕК ==========
+const demoHabits = [
+    {
+        category: 'Здоровье',
+        items: [
+            { name: 'Сон по режиму', reward: 10, completed: false, action: 'сон' },
+            { name: 'Прием витаминов', reward: 2, completed: false, action: 'витамины' },
+            { name: 'Больше воды', reward: 2, completed: false, action: 'вода' }
+        ]
+    },
+    {
+        category: 'Спорт',
+        items: [
+            { name: 'Прогулка', reward: 5, completed: false, action: 'прогулка' },
+            { name: 'Зарядка', reward: 5, completed: false, action: 'зарядка' },
+            { name: 'Тренировка', reward: 10, completed: false, action: 'тренировка' },
+            { name: 'Йога/пилатес', reward: 5, completed: false, action: 'йога' }
+        ]
+    }
+];
+
+// ========== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ==========
 document.addEventListener('DOMContentLoaded', () => {
     initCalendar();
     loadHabits();
-    initNavigation();
-    initModal();
     initMascot();
+    initNavigation();
+    initAddHabitButton();
 });
 
-// ============= КАЛЕНДАРЬ =============
+// ========== КАЛЕНДАРЬ ==========
 function initCalendar() {
     const weekDays = document.querySelectorAll('.week-day');
     const today = new Date();
@@ -44,21 +63,24 @@ function initCalendar() {
         date.setDate(date.getDate() + index);
         
         const dayNumber = date.getDate();
-        const isToday = date.toDateString() === today.toDateString();
+        const isToday = isSameDate(date, today);
         const isFuture = date > today;
         
         dayEl.querySelector('.day-number').textContent = dayNumber;
         
+        dayEl.classList.remove('active', 'future');
         if (isToday) {
             dayEl.classList.add('active');
         } else if (isFuture) {
             dayEl.classList.add('future');
         }
         
-        // Кликабельность для прошлых и сегодняшнего дня
+        // Клик по дню
         if (!isFuture) {
             dayEl.style.cursor = 'pointer';
-            dayEl.addEventListener('click', () => selectDate(date));
+            dayEl.addEventListener('click', () => {
+                selectDate(date, dayEl);
+            });
         }
     });
 }
@@ -66,57 +88,34 @@ function initCalendar() {
 function getStartOfWeek(date) {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Понедельник
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
 }
 
-function selectDate(date) {
+function isSameDate(date1, date2) {
+    return date1.toDateString() === date2.toDateString();
+}
+
+function selectDate(date, dayEl) {
     state.selectedDate = date;
     
-    // Обновляем визуально
+    // Обновляем активный день
     document.querySelectorAll('.week-day').forEach(el => {
         el.classList.remove('active');
     });
+    dayEl.classList.add('active');
+    
+    // Вибрация
+    hapticFeedback('light');
     
     // Загружаем привычки для выбранной даты
     loadHabitsForDate(date);
 }
 
-// ============= ЗАГРУЗКА ПРИВЫЧЕК =============
-async function loadHabits() {
-    try {
-        // Здесь должен быть реальный API запрос
-        // const response = await fetch(`${API_URL}/habits?user_id=${userId}`);
-        // const data = await response.json();
-        
-        // Демо данные из вашего дизайна
-        const demoHabits = [
-            {
-                category: 'Здоровье',
-                habits: [
-                    { name: 'Сон по режиму', reward: 10, completed: false, action: 'зарядка' },
-                    { name: 'Прием витаминов', reward: 2, completed: false, action: 'витамины' },
-                    { name: 'Больше воды', reward: 2, completed: false, action: 'вода' }
-                ]
-            },
-            {
-                category: 'Спорт',
-                habits: [
-                    { name: 'Прогулка', reward: 5, completed: false, action: 'прогулка' },
-                    { name: 'Зарядка', reward: 5, completed: false, action: 'зарядка' },
-                    { name: 'Тренировка', reward: 10, completed: false, action: 'тренировка' },
-                    { name: 'Йога/пилатес', reward: 5, completed: false, action: 'йога' }
-                ]
-            }
-        ];
-        
-        state.habits = demoHabits;
-        renderHabits();
-        
-    } catch (error) {
-        console.error('Ошибка загрузки привычек:', error);
-        tg.showAlert('Не удалось загрузить привычки');
-    }
+// ========== ПРИВЫЧКИ ==========
+function loadHabits() {
+    state.habits = demoHabits;
+    renderHabits();
 }
 
 function renderHabits() {
@@ -132,7 +131,7 @@ function renderHabits() {
         title.textContent = category.category;
         section.appendChild(title);
         
-        category.habits.forEach(habit => {
+        category.items.forEach(habit => {
             const card = createHabitCard(habit);
             section.appendChild(card);
         });
@@ -146,123 +145,71 @@ function createHabitCard(habit) {
     card.className = 'habit-card';
     
     card.innerHTML = `
-        <div class="habit-main">
+        <div class="habit-info">
             <span class="habit-name">${habit.name}</span>
             <span class="habit-reward">${habit.reward}🌸</span>
         </div>
-        <button class="habit-check ${habit.completed ? 'checked' : ''}">
+        <button class="habit-check-btn ${habit.completed ? 'checked' : ''}">
             ${habit.completed ? '✓' : '+'}
         </button>
     `;
     
-    const checkBtn = card.querySelector('.habit-check');
-    checkBtn.addEventListener('click', () => toggleHabit(habit, checkBtn));
+    const checkBtn = card.querySelector('.habit-check-btn');
+    checkBtn.addEventListener('click', () => {
+        toggleHabit(habit, checkBtn);
+    });
     
     return card;
 }
 
-async function toggleHabit(habit, button) {
+function toggleHabit(habit, button) {
     habit.completed = !habit.completed;
     
-    // Анимация
+    // Обновляем UI
     button.classList.toggle('checked');
     button.textContent = habit.completed ? '✓' : '+';
     
     // Вибрация
-    if (tg.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('medium');
+    hapticFeedback(habit.completed ? 'success' : 'light');
+    
+    // Показать сообщение от Спринта
+    if (habit.completed) {
+        showMascotMessage(`Отлично! +${habit.reward}🌸 за "${habit.name}"`);
     }
     
-    // Отправка на сервер
-    try {
-        // await fetch(`${API_URL}/habits/toggle`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //         user_id: userId,
-        //         action: habit.action,
-        //         date: state.selectedDate.toISOString(),
-        //         completed: habit.completed
-        //     })
-        // });
-        
-        console.log('Habit toggled:', habit.name, habit.completed);
-        
-        // Показать сообщение от Спринта при первом выполнении
-        if (habit.completed) {
-            showMascotMessage(`Отлично! +${habit.reward}🌸 за "${habit.name}"`);
-        }
-        
-    } catch (error) {
-        console.error('Ошибка сохранения привычки:', error);
-        habit.completed = !habit.completed; // Откат
-        button.classList.toggle('checked');
-        button.textContent = habit.completed ? '✓' : '+';
-    }
+    // Здесь должна быть отправка на сервер
+    saveHabitToServer(habit);
 }
 
-// ============= МОДАЛЬНОЕ ОКНО =============
-function initModal() {
-    const addBtn = document.getElementById('add-habit-btn');
-    const modal = document.getElementById('habit-modal');
-    const closeBtn = modal.querySelector('.modal-close');
+async function saveHabitToServer(habit) {
+    console.log('💾 Сохранение привычки:', habit.name, habit.completed);
     
-    addBtn.addEventListener('click', () => {
-        modal.classList.add('active');
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred('light');
-        }
-    });
-    
-    closeBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
-    
-    // Закрытие по клику вне модального окна
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-        }
-    });
-    
-    // Обработка добавления привычек из модального окна
-    const addButtons = modal.querySelectorAll('.habit-add-btn');
-    addButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const habitItem = this.closest('.habit-item');
-            const habitName = habitItem.querySelector('.habit-name').textContent;
-            const habitReward = habitItem.querySelector('.habit-reward').textContent;
-            
-            addHabitToList(habitName, habitReward);
-            modal.classList.remove('active');
-            
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-            
-            showMascotMessage(`Добавлена привычка "${habitName}"! Теперь поливай её каждый день 🌱`);
-        });
-    });
+    // TODO: Реальный API запрос к вашему боту
+    // const response = await fetch(`${API_URL}/habits/toggle`, {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //         user_id: userId,
+    //         action: habit.action,
+    //         date: state.selectedDate.toISOString(),
+    //         completed: habit.completed
+    //     })
+    // });
 }
 
-function addHabitToList(name, reward) {
-    // Логика добавления новой привычки
-    console.log('Adding habit:', name, reward);
-    
-    // Отправка на сервер
-    // await fetch(`${API_URL}/habits/add`, {...});
-    
-    // Перезагрузка списка
-    loadHabits();
+function loadHabitsForDate(date) {
+    console.log('📅 Загрузка привычек для:', date.toLocaleDateString('ru-RU'));
+    // TODO: Загрузка с сервера для конкретной даты
 }
 
-// ============= МАСКОТ СПРИНТ =============
+// ========== МАСКОТ СПРИНТ ==========
 function initMascot() {
     const mascot = document.getElementById('sprint-mascot');
-    const closeBtn = mascot.querySelector('.mascot-close');
+    const closeBtn = mascot.querySelector('.mascot-close-btn');
     
     closeBtn.addEventListener('click', () => {
         mascot.classList.add('hidden');
+        hapticFeedback('light');
     });
     
     // Автоскрытие через 10 секунд
@@ -278,16 +225,31 @@ function showMascotMessage(message) {
     textEl.textContent = message;
     mascot.classList.remove('hidden');
     
+    hapticFeedback('success');
+    
     // Автоскрытие через 5 секунд
     setTimeout(() => {
         mascot.classList.add('hidden');
     }, 5000);
 }
 
-// ============= НАВИГАЦИЯ =============
+// ========== КНОПКА ДОБАВЛЕНИЯ ПРИВЫЧКИ ==========
+function initAddHabitButton() {
+    const addBtn = document.getElementById('add-habit-btn');
+    
+    addBtn.addEventListener('click', () => {
+        hapticFeedback('light');
+        tg.showPopup({
+            title: 'Добавить привычку',
+            message: 'Эта функция скоро будет доступна!',
+            buttons: [{ type: 'ok' }]
+        });
+    });
+}
+
+// ========== НАВИГАЦИЯ ==========
 function initNavigation() {
     const navButtons = document.querySelectorAll('.nav-item');
-    const screens = document.querySelectorAll('.screen');
     
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -297,9 +259,7 @@ function initNavigation() {
             navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Показываем нужный экран
-            screens.forEach(s => s.classList.remove('active'));
-            document.getElementById(`screen-${screenName}`).classList.add('active');
+            hapticFeedback('light');
             
             // Обновляем заголовок
             const titles = {
@@ -308,24 +268,32 @@ function initNavigation() {
                 'garden': 'Сад',
                 'stats': 'История'
             };
-            document.getElementById('page-title').textContent = titles[screenName];
+            document.querySelector('header h1').textContent = titles[screenName];
             
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
+            console.log('📱 Переход на экран:', screenName);
+            
+            // TODO: Показать соответствующий экран
+            if (screenName !== 'today') {
+                tg.showAlert(`Экран "${titles[screenName]}" в разработке`);
             }
         });
     });
 }
 
-// ============= РАБОТА С ДАТОЙ =============
-async function loadHabitsForDate(date) {
-    // Загрузка привычек для конкретной даты
-    console.log('Loading habits for:', date.toLocaleDateString('ru-RU'));
-    // Реализация загрузки с сервера
+// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+function hapticFeedback(type) {
+    if (tg.HapticFeedback) {
+        if (type === 'success') {
+            tg.HapticFeedback.notificationOccurred('success');
+        } else if (type === 'light') {
+            tg.HapticFeedback.impactOccurred('light');
+        } else {
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+    }
 }
 
-// Отправка данных при закрытии приложения
-window.addEventListener('beforeunload', () => {
-    // Сохранение состояния
-    console.log('Saving state before close');
-});
+// ========== ОТЛАДКА ==========
+console.log('🚀 Mini App запущен');
+console.log('📱 Платформа:', tg.platform);
+console.log('🎨 Тема:', tg.colorScheme);
