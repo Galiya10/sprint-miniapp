@@ -2,161 +2,88 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Трекер привычек</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Главный контейнер -->
     <div id="app">
-        <!-- Хедер с заголовком -->
-        <header id="page-header">
-            <h1 id="page-title">Сегодня</h1>
-            <button id="settings-btn" class="icon-btn">⚙️</button>
+        <!-- Хедер -->
+        <header>
+            <h1>Сегодня</h1>
+            <button class="settings-icon">🌸</button>
         </header>
 
-        <!-- Экран 1: Сегодня -->
-        <div id="screen-today" class="screen active">
-            <!-- Календарь недели -->
-            <div class="week-calendar">
-                <div class="week-day" data-day="0">
-                    <span class="day-name">пн</span>
-                    <span class="day-number">4</span>
-                </div>
-                <div class="week-day" data-day="1">
-                    <span class="day-name">вт</span>
-                    <span class="day-number">5</span>
-                </div>
-                <div class="week-day" data-day="2">
-                    <span class="day-name">ср</span>
-                    <span class="day-number">6</span>
-                </div>
-                <div class="week-day" data-day="3">
-                    <span class="day-name">чт</span>
-                    <span class="day-number">7</span>
-                </div>
-                <div class="week-day active" data-day="4">
-                    <span class="day-name">пт</span>
-                    <span class="day-number">8</span>
-                </div>
-                <div class="week-day future" data-day="5">
-                    <span class="day-name">сб</span>
-                    <span class="day-number">9</span>
-                </div>
-                <div class="week-day future" data-day="6">
-                    <span class="day-name">вс</span>
-                    <span class="day-number">10</span>
-                </div>
+        <!-- Календарь недели -->
+        <div class="week-calendar">
+            <div class="week-day">
+                <span class="day-label">пн</span>
+                <span class="day-number">4</span>
             </div>
-
-            <!-- Кнопка добавления привычки -->
-            <button id="add-habit-btn" class="add-btn">+ добавить новую привычку</button>
-
-            <!-- Список категорий и привычек -->
-            <div id="habits-list" class="habits-container">
-                <!-- Категории будут добавлены через JS -->
+            <div class="week-day">
+                <span class="day-label">вт</span>
+                <span class="day-number">5</span>
             </div>
-
-            <!-- Маскот Спринт -->
-            <div id="sprint-mascot" class="mascot">
-                <div class="mascot-bubble">
-                    <div class="mascot-badge">Спринт</div>
-                    <div class="mascot-text">Привет! Я Спринт, твой садовник привычек. Посади свою первую привычку - поливать будем вместе</div>
-                    <button class="mascot-close">×</button>
-                </div>
-                <img src="sprint.png" alt="Спринт" class="mascot-image">
+            <div class="week-day">
+                <span class="day-label">ср</span>
+                <span class="day-number">6</span>
+            </div>
+            <div class="week-day">
+                <span class="day-label">чт</span>
+                <span class="day-number">7</span>
+            </div>
+            <div class="week-day active">
+                <span class="day-label">пт</span>
+                <span class="day-number">8</span>
+            </div>
+            <div class="week-day future">
+                <span class="day-label">сб</span>
+                <span class="day-number">9</span>
+            </div>
+            <div class="week-day future">
+                <span class="day-label">вс</span>
+                <span class="day-number">10</span>
             </div>
         </div>
 
-        <!-- Экран 2: Модальное окно со списком привычек -->
-        <div id="habit-modal" class="modal">
-            <div class="modal-content">
-                <button class="modal-close">×</button>
-                <h2>Здоровье</h2>
-                <button class="add-custom-btn">+ добавить свою привычку</button>
-                
-                <div class="habit-item">
-                    <div class="habit-info">
-                        <span class="habit-name">Сон по режиму</span>
-                        <span class="habit-reward">10🌸</span>
-                    </div>
-                    <button class="habit-add-btn">+</button>
-                </div>
+        <!-- Кнопка добавления привычки -->
+        <button id="add-habit-btn" class="add-habit-btn">
+            + добавить новую привычку
+        </button>
 
-                <div class="habit-item">
-                    <div class="habit-info">
-                        <span class="habit-name">Прием витаминов</span>
-                        <span class="habit-reward">2🌸</span>
-                    </div>
-                    <button class="habit-add-btn">+</button>
-                </div>
+        <!-- Список привычек (пустой, будет заполняться JS) -->
+        <div id="habits-list" class="habits-list"></div>
 
-                <div class="habit-item">
-                    <div class="habit-info">
-                        <span class="habit-name">Больше воды</span>
-                        <span class="habit-reward">2🌸</span>
-                    </div>
-                    <button class="habit-add-btn">+</button>
-                </div>
-
-                <h2>Спорт</h2>
-                <button class="add-custom-btn">+ добавить свою привычку</button>
-
-                <div class="habit-item">
-                    <div class="habit-info">
-                        <span class="habit-name">Прогулка</span>
-                        <span class="habit-reward">5🌸</span>
-                    </div>
-                    <button class="habit-add-btn">+</button>
-                </div>
-
-                <div class="habit-item">
-                    <div class="habit-info">
-                        <span class="habit-name">Зарядка</span>
-                        <span class="habit-reward">5🌸</span>
-                    </div>
-                    <button class="habit-add-btn">+</button>
-                </div>
-
-                <div class="habit-item">
-                    <div class="habit-info">
-                        <span class="habit-name">Тренировка</span>
-                        <span class="habit-reward">10</span>
-                    </div>
-                    <button class="habit-add-btn">+</button>
-                </div>
-
-                <div class="habit-item">
-                    <div class="habit-info">
-                        <span class="habit-name">Йога/пилатес</span>
-                        <span class="habit-reward">5🌸</span>
-                    </div>
-                    <button class="habit-add-btn">+</button>
-                </div>
-
-                <h2>Своя категория</h2>
-                <button class="add-custom-btn">+ добавить свою привычку</button>
+        <!-- Маскот Спринт -->
+        <div id="sprint-mascot" class="sprint-mascot">
+            <div class="mascot-bubble">
+                <div class="mascot-badge">Спринт</div>
+                <p class="mascot-text">Привет! Я Спринт, твой садовник привычек. Посади свою первую привычку - поливать будем вместе</p>
+                <button class="mascot-close-btn">×</button>
+            </div>
+            <div class="mascot-avatar">
+                <img src="sprint.jpg" alt="Спринт">
             </div>
         </div>
 
-        <!-- Навигация -->
+        <!-- Нижняя навигация -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-screen="today">
-                <span class="nav-icon">📅</span>
-                <span class="nav-label">сегодня</span>
+                <div class="nav-icon">📅</div>
+                <div class="nav-label">сегодня</div>
             </button>
             <button class="nav-item" data-screen="duel">
-                <span class="nav-icon">👥</span>
-                <span class="nav-label">дуэль</span>
+                <div class="nav-icon">👥</div>
+                <div class="nav-label">дуэль</div>
             </button>
             <button class="nav-item" data-screen="garden">
-                <span class="nav-icon">🌸</span>
-                <span class="nav-label">сад</span>
+                <div class="nav-icon">🌸</div>
+                <div class="nav-label">сад</div>
             </button>
             <button class="nav-item" data-screen="stats">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label">история</span>
+                <div class="nav-icon">📊</div>
+                <div class="nav-label">история</div>
             </button>
         </nav>
     </div>
