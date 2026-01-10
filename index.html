@@ -1,234 +1,317 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-  />
-  <title>Сегодня — Sprint</title>
-
-  <!-- Nunito (300/400/600/700/800) -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Трекер привычек — Сегодня</title>
+  
+  <!-- Favicon: цветок XP -->
+  <link rel="icon" type="image/png" sizes="32x32" href="https://github.com/Galiya10/sprint-miniapp/raw/0188f6f0e6b40145849b86aa60b2ef9a1a447448/images/цветок_xp.png">
+  
+  <!-- Google Fonts: Nunito (300, 400, 600, 700, 800) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
+  
   <style>
-    /* =========================
-       Tokens
-       ========================= */
-    :root{
-      --bg: #2a3640;
-      --panel: #323e49;
-      --text: rgba(255,255,255,.90);
-      --muted: rgba(255,255,255,.42);
-
-      --accent: #C5D375;
-      --radius: 18px;
-
-      --space: 16px;
-      --header-h: 56px;
-      --cal-h: 88px;
-
-      /* Telegram Safe Area + Header Offset */
-      /* Делаем запас сверху под "крестик" и статус бар */
-      --tg-top: 24px; 
+    /* ===========================
+       CSS Variables (Design Tokens)
+       =========================== */
+    :root {
+      /* Colors */
+      --bg-main: #f8fafc;
+      --bg-white: #ffffff;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #10b981;
+      --accent-secondary-hover: #0da271;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border-light: #e2e8f0;
+      --hover-bg: #f1f5f9;
+      
+      /* Typography */
+      --font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      
+      /* Spacing */
+      --spacing-base: 16px;
+      --spacing-safe-top: env(safe-area-inset-top, 20px);
+      --spacing-safe-bottom: env(safe-area-inset-bottom, 20px);
+      
+      /* Sizes */
+      --header-height: 60px;
+      --button-height: 56px;
+      --today-circle-size: 42px;
+      
+      /* Borders */
+      --radius-button: 12px;
+      --radius-circle: 50%;
+      
+      /* Shadows */
+      --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-button: 0 4px 12px rgba(16, 185, 129, 0.25);
+      --shadow-button-hover: 0 6px 16px rgba(16, 185, 129, 0.35);
     }
-
-    *{ box-sizing: border-box; }
-    html, body{ height: 100%; }
-    body{
+    
+    /* ===========================
+       Base Styles
+       =========================== */
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      padding: 0;
+    }
+    
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-main);
+      color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
     }
-
-    .app{
-      max-width: 420px;
+    
+    /* ===========================
+       Main Container
+       =========================== */
+    .container {
+      max-width: 375px;
       margin: 0 auto;
-      padding: 0 var(--space);
+      padding-left: var(--spacing-base);
+      padding-right: var(--spacing-base);
+      padding-bottom: var(--spacing-safe-bottom);
     }
-
-    /* =========================
-       Top area (Safe Zone)
-       ========================= */
-    .top{
-      /* Отступ сверху: safe-area + наш запас под плашку Telegram */
-      padding-top: calc(var(--tg-top) + env(safe-area-inset-top, 20px));
-      padding-bottom: var(--space);
+    
+    /* ===========================
+       Header Section (Fixed)
+       =========================== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background-color: var(--bg-white);
+      box-shadow: var(--shadow-header);
+      padding-top: var(--spacing-safe-top);
+      height: calc(var(--header-height) + var(--spacing-safe-top));
     }
-
-    .top__row{
+    
+    .header__content {
+      max-width: 375px;
+      margin: 0 auto;
+      padding: 0 var(--spacing-base);
+      height: var(--header-height);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-height: var(--header-h);
+      justify-content: center;
+      gap: 10px;
     }
-
-    .title{
-      margin: 0;
-      font-weight: 800;
-      font-size: 42px;
-      letter-spacing: -0.8px;
-      line-height: 1;
-    }
-
-    /* XP flower button */
-    .xp{
-      width: 72px;
-      height: 38px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
-      display: grid;
-      place-items: center;
-      padding: 0;
-      cursor: pointer;
-      transition: transform .18s ease, background-color .18s ease;
-    }
-
-    .xp img{
-      width: 22px;
-      height: 22px;
+    
+    .header__icon {
+      width: 24px;
+      height: 24px;
       display: block;
     }
-
-    /* =========================
-       Calendar panel
-       ========================= */
-    .calendar{
-      height: var(--cal-h);
-      background: var(--panel);
-      border-radius: var(--radius);
-      padding: 16px 18px;
-      display: flex;
-      align-items: center;
-      margin-top: 12px;
+    
+    .header__title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
     }
-
-    .calendar__grid{
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
+    
+    /* ===========================
+       Content Area (Below Fixed Header)
+       =========================== */
+    .content {
+      padding-top: calc(var(--header-height) + var(--spacing-safe-top) + 20px);
     }
-
-    .day{
-      flex: 1 1 0;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      border-radius: 12px;
-      padding: 6px 0;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text);
-      font: inherit;
+    
+    /* ===========================
+       Calendar Grid
+       =========================== */
+    .calendar {
+      margin-bottom: 24px;
+    }
+    
+    .calendar__grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px 4px;
+      text-align: center;
+    }
+    
+    /* Days of week labels */
+    .calendar__dow {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 0;
+    }
+    
+    /* Special case: "Ср" should be lowercase "с" */
+    .calendar__dow--lowercase {
+      text-transform: none;
+    }
+    
+    /* Date numbers */
+    .calendar__date {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding: 8px 0;
       cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
       user-select: none;
     }
-
-    .dow{
-      font-size: 16px;
+    
+    /* Hover effect for dates (not today) */
+    .calendar__date:hover:not(.calendar__date--today) {
+      background-color: var(--hover-bg);
+    }
+    
+    /* Today's date: blue circle with white text */
+    .calendar__date--today {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      font-size: 18px;
       font-weight: 700;
-      letter-spacing: 0.1px;
-      color: rgba(255,255,255,0.78);
-      text-transform: lowercase;
+      width: var(--today-circle-size);
+      height: var(--today-circle-size);
+      border-radius: var(--radius-circle);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      cursor: default;
     }
-
-    .dom{
-      font-size: 30px;
-      font-weight: 400;
-      line-height: 1;
-      color: rgba(255,255,255,0.86);
-    }
-
-    /* Приглушенные дни (будущее/прошлое) */
-    .day.is-muted .dow,
-    .day.is-muted .dom{
-      color: var(--muted);
-    }
-
-    /* СЕГОДНЯ: Суббота 10 */
-    .day.is-today .dom{
-      width: 54px;
-      height: 54px;
-      display: grid;
-      place-items: center;
-      border-radius: 999px;
-      border: 2.5px solid var(--accent);
-      color: rgba(255,255,255,0.94);
+    
+    /* ===========================
+       Add Habit Button
+       =========================== */
+    .add-button {
+      width: 100%;
+      height: var(--button-height);
+      background-color: var(--accent-secondary);
+      color: #ffffff;
+      font-family: var(--font-family);
+      font-size: 16px;
       font-weight: 600;
-      background: transparent;
+      border: none;
+      border-radius: var(--radius-button);
+      box-shadow: var(--shadow-button);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      outline: none;
     }
-
-    /* Responsive */
-    @media (max-width: 360px){
-      .title{ font-size: 38px; }
-      .calendar{ padding: 14px 16px; }
-      .dow{ font-size: 15px; }
-      .dom{ font-size: 28px; }
-      .day.is-today .dom{ width: 50px; height: 50px; }
+    
+    .add-button::before {
+      content: '+';
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    
+    .add-button:hover {
+      background-color: var(--accent-secondary-hover);
+      transform: scale(1.02);
+      box-shadow: var(--shadow-button-hover);
+    }
+    
+    .add-button:active {
+      transform: scale(0.98);
+    }
+    
+    /* ===========================
+       Responsive Adjustments
+       =========================== */
+    @media (max-width: 320px) {
+      .header__title {
+        font-size: 24px;
+      }
+      
+      .calendar__dow {
+        font-size: 12px;
+      }
+      
+      .calendar__date {
+        font-size: 14px;
+      }
+      
+      .calendar__date--today {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+      }
+      
+      .add-button {
+        font-size: 15px;
+      }
+    }
+    
+    @media (min-width: 376px) {
+      .container,
+      .header__content {
+        max-width: 420px;
+      }
     }
   </style>
 </head>
-
 <body>
-  <div class="app">
-    <header class="top">
-      <div class="top__row">
-        <h1 class="title">Сегодня</h1>
-
-        <!-- XP rewards -->
-        <button class="xp" type="button" aria-label="Награды XP">
-          <img 
-            src="https://github.com/Galiya10/sprint-miniapp/raw/0188f6f0e6b40145849b86aa60b2ef9a1a447448/images/цветок_xp.png" 
-            alt="xp"
-          />
-        </button>
-      </div>
-
-      <!-- Календарь: 5-11 января 2026 -->
+  
+  <!-- Fixed Header -->
+  <header class="header">
+    <div class="header__content">
+      <img 
+        src="https://github.com/Galiya10/sprint-miniapp/raw/0188f6f0e6b40145849b86aa60b2ef9a1a447448/images/цветок_xp.png" 
+        alt="Цветок XP" 
+        class="header__icon"
+      >
+      <h1 class="header__title">Сегодня</h1>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="container">
+    <div class="content">
+      
+      <!-- Calendar Section -->
       <section class="calendar" aria-label="Календарь недели">
-        <div class="calendar__grid" role="list">
+        <div class="calendar__grid">
+          <!-- Days of Week -->
+          <div class="calendar__dow">ПН</div>
+          <div class="calendar__dow">ВТ</div>
+          <div class="calendar__dow calendar__dow--lowercase">Ср</div>
+          <div class="calendar__dow">ЧТ</div>
+          <div class="calendar__dow">ПТ</div>
+          <div class="calendar__dow calendar__dow--lowercase">Сб</div>
+          <div class="calendar__dow">ВС</div>
           
-          <button class="day" type="button">
-            <div class="dow">пн</div><div class="dom">5</div>
-          </button>
-
-          <button class="day" type="button">
-            <div class="dow">вт</div><div class="dom">6</div>
-          </button>
-
-          <button class="day" type="button">
-            <div class="dow">ср</div><div class="dom">7</div>
-          </button>
-
-          <button class="day" type="button">
-            <div class="dow">чт</div><div class="dom">8</div>
-          </button>
-
-          <button class="day" type="button">
-            <div class="dow">пт</div><div class="dom">9</div>
-          </button>
-
-          <!-- СЕГОДНЯ: Суббота, 10 января -->
-          <button class="day is-today" type="button" aria-current="date">
-            <div class="dow">сб</div><div class="dom">10</div>
-          </button>
-
-          <button class="day is-muted" type="button">
-            <div class="dow">вс</div><div class="dom">11</div>
-          </button>
-          
+          <!-- Date Numbers (January 5-11, 2026) -->
+          <div class="calendar__date">5</div>
+          <div class="calendar__date">6</div>
+          <div class="calendar__date">7</div>
+          <div class="calendar__date">8</div>
+          <div class="calendar__date">9</div>
+          <div class="calendar__date calendar__date--today" aria-current="date">10</div>
+          <div class="calendar__date">11</div>
         </div>
       </section>
-    </header>
-  </div>
+      
+      <!-- Add Habit Button -->
+      <button class="add-button" type="button" aria-label="Добавить новую привычку">
+        добавить новую привычку
+      </button>
+      
+    </div>
+  </main>
+  
 </body>
 </html>
