@@ -6,7 +6,7 @@
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
   />
-  <title>Сегодня — Habit Tracker</title>
+  <title>Сегодня — Sprint</title>
 
   <!-- Nunito (300/400/600/700/800) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,22 +18,20 @@
        Tokens
        ========================= */
     :root{
-      --bg: #1f2a33;                /* фон */
-      --panel: #2a3640;             /* плашка календаря */
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.50);
-      --muted-strong: rgba(255,255,255,.62);
+      --bg: #2a3640;
+      --panel: #323e49;
+      --text: rgba(255,255,255,.90);
+      --muted: rgba(255,255,255,.42);
 
-      --accent: #C5D375;            /* цвет круга "сегодня" */
-      --radius: 20px;
+      --accent: #C5D375;
+      --radius: 18px;
 
       --space: 16px;
-      --header-h: 96px;             /* визуально как на примере: крупный отступ сверху */
-      --cal-h: 116px;
+      --header-h: 56px;
+      --cal-h: 88px;
 
-      /* Важно для Telegram mini app на Android: сверху есть Telegram header ("Закрыть" и т.д.)
-         Дай небольшой запас + safe-area. */
-      --tg-top: 44px;
+      /* Telegram header safe area */
+      --tg-top: 8px;
     }
 
     *{ box-sizing: border-box; }
@@ -44,7 +42,6 @@
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     .app{
@@ -57,8 +54,8 @@
        Top area
        ========================= */
     .top{
-      padding-top: calc(var(--tg-top) + env(safe-area-inset-top));
-      padding-bottom: 14px;
+      padding-top: calc(var(--tg-top) + env(safe-area-inset-top, 0px));
+      padding-bottom: var(--space);
     }
 
     .top__row{
@@ -72,15 +69,15 @@
     .title{
       margin: 0;
       font-weight: 800;
-      font-size: 64px;             /* как на скрине — очень крупно */
-      letter-spacing: -1.2px;
-      line-height: 0.95;
+      font-size: 42px;
+      letter-spacing: -0.8px;
+      line-height: 1;
     }
 
     /* XP flower button */
     .xp{
-      width: 92px;
-      height: 44px;
+      width: 72px;
+      height: 38px;
       border-radius: 999px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.06);
@@ -88,19 +85,18 @@
       place-items: center;
       padding: 0;
       cursor: pointer;
-      transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+      transition: transform .18s ease, background-color .18s ease;
     }
 
     .xp img{
-      width: 26px;
-      height: 26px;
+      width: 22px;
+      height: 22px;
       display: block;
     }
 
     @media (hover:hover){
       .xp:hover{
         background: rgba(255,255,255,0.06);
-        border-color: rgba(255,255,255,0.10);
         transform: scale(1.02);
       }
     }
@@ -113,16 +109,17 @@
       height: var(--cal-h);
       background: var(--panel);
       border-radius: var(--radius);
-      padding: 22px 22px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
+      margin-top: 12px;
     }
 
     .calendar__grid{
       width: 100%;
       display: flex;
       justify-content: space-between;
-      gap: 16px;
+      gap: 10px;
     }
 
     .day{
@@ -131,77 +128,75 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 18px;
-      border-radius: 14px;
-      padding: 8px 0;
+      gap: 10px;
+      border-radius: 12px;
+      padding: 6px 0;
       border: 1px solid transparent;
       background: transparent;
       color: var(--text);
       font: inherit;
       cursor: pointer;
-      transition: background-color .18s ease, transform .18s ease, border-color .18s ease;
+      transition: background-color .18s ease, transform .18s ease;
       user-select: none;
     }
 
     .dow{
-      font-size: 22px;             /* как на примере — крупные буквы */
+      font-size: 16px;
       font-weight: 700;
-      letter-spacing: 0.2px;
-      color: rgba(255,255,255,0.86);
+      letter-spacing: 0.1px;
+      color: rgba(255,255,255,0.78);
       text-transform: lowercase;
     }
 
     .dom{
-      font-size: 44px;             /* крупные цифры как на примере */
+      font-size: 30px;
       font-weight: 400;
       line-height: 1;
       color: rgba(255,255,255,0.86);
     }
 
-    /* приглушённые (сб/вс) как на скрине */
+    /* приглушённые (сб/вс) */
     .day.is-muted .dow,
     .day.is-muted .dom{
-      color: rgba(255,255,255,0.35);
+      color: var(--muted);
     }
 
     @media (hover:hover){
       .day:hover{
         background: rgba(255,255,255,0.04);
-        border-color: rgba(255,255,255,0.07);
       }
     }
     .day:active{ transform: scale(0.98); }
 
-    /* выбранный день: обводка кругом #C5D375 */
+    /* сегодня: круг #C5D375 */
     .day.is-today .dom{
-      width: 74px;
-      height: 74px;
+      width: 54px;
+      height: 54px;
       display: grid;
       place-items: center;
       border-radius: 999px;
-      border: 3px solid var(--accent);
-      color: rgba(255,255,255,0.92);
+      border: 2.5px solid var(--accent);
+      color: rgba(255,255,255,0.94);
       font-weight: 600;
       background: transparent;
-      box-shadow: 0 0 0 rgba(197,211,117,0.0);
       animation: ringPulse 1.9s ease-in-out infinite;
     }
 
     @keyframes ringPulse{
-      0%   { box-shadow: 0 0 0 0 rgba(197,211,117,0.0); }
-      50%  { box-shadow: 0 10px 22px 0 rgba(197,211,117,0.14); }
-      100% { box-shadow: 0 0 0 0 rgba(197,211,117,0.0); }
+      0%   { box-shadow: 0 0 0 rgba(197,211,117,0.0); }
+      50%  { box-shadow: 0 8px 18px rgba(197,211,117,0.16); }
+      100% { box-shadow: 0 0 0 rgba(197,211,117,0.0); }
     }
 
     /* =========================
        Responsive
        ========================= */
     @media (max-width: 360px){
-      .title{ font-size: 56px; }
-      .calendar{ padding: 18px 16px; }
-      .dow{ font-size: 20px; }
-      .dom{ font-size: 40px; }
-      .day.is-today .dom{ width: 68px; height: 68px; }
+      .title{ font-size: 38px; }
+      .calendar{ padding: 14px 16px; }
+      .dow{ font-size: 15px; }
+      .dom{ font-size: 28px; }
+      .day.is-today .dom{ width: 50px; height: 50px; }
     }
 
     @media (min-width: 768px){
@@ -217,9 +212,12 @@
       <div class="top__row">
         <h1 class="title">Сегодня</h1>
 
-        <!-- XP rewards: вставь сюда файл из репозитория -->
+        <!-- XP rewards из репозитория GitHub -->
         <button class="xp" type="button" aria-label="Награды XP">
-          <img src="assets/цветок_xp.png" alt="" />
+          <img 
+            src="https://github.com/Galiya10/sprint-miniapp/raw/0188f6f0e6b40145849b86aa60b2ef9a1a447448/images/цветок_xp.png" 
+            alt=""
+          />
         </button>
       </div>
 
@@ -249,7 +247,7 @@
             <div class="dow">сб</div><div class="dom">9</div>
           </button>
 
-          <!-- Сегодня: 10 января -->
+          <!-- Сегодня: суббота, 10 января -->
           <button class="day is-muted is-today" type="button" role="listitem" aria-current="date" aria-label="Воскресенье, 10 (сегодня)">
             <div class="dow">вс</div><div class="dom">10</div>
           </button>
@@ -257,10 +255,5 @@
       </section>
     </header>
   </div>
-
-  <script>
-    // При желании можно здесь подключить Telegram.WebApp и брать реальные safe-area/viewport параметры,
-    // но верстка уже учитывает верхний Telegram header через --tg-top.
-  </script>
 </body>
 </html>
