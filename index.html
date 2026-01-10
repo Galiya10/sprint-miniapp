@@ -30,8 +30,9 @@
       --header-h: 56px;
       --cal-h: 88px;
 
-      /* Telegram header safe area */
-      --tg-top: 8px;
+      /* Telegram Safe Area + Header Offset */
+      /* Делаем запас сверху под "крестик" и статус бар */
+      --tg-top: 24px; 
     }
 
     *{ box-sizing: border-box; }
@@ -51,10 +52,11 @@
     }
 
     /* =========================
-       Top area
+       Top area (Safe Zone)
        ========================= */
     .top{
-      padding-top: calc(var(--tg-top) + env(safe-area-inset-top, 0px));
+      /* Отступ сверху: safe-area + наш запас под плашку Telegram */
+      padding-top: calc(var(--tg-top) + env(safe-area-inset-top, 20px));
       padding-bottom: var(--space);
     }
 
@@ -94,14 +96,6 @@
       display: block;
     }
 
-    @media (hover:hover){
-      .xp:hover{
-        background: rgba(255,255,255,0.06);
-        transform: scale(1.02);
-      }
-    }
-    .xp:active{ transform: scale(0.98); }
-
     /* =========================
        Calendar panel
        ========================= */
@@ -136,7 +130,6 @@
       color: var(--text);
       font: inherit;
       cursor: pointer;
-      transition: background-color .18s ease, transform .18s ease;
       user-select: none;
     }
 
@@ -155,20 +148,13 @@
       color: rgba(255,255,255,0.86);
     }
 
-    /* приглушённые (сб/вс) */
+    /* Приглушенные дни (будущее/прошлое) */
     .day.is-muted .dow,
     .day.is-muted .dom{
       color: var(--muted);
     }
 
-    @media (hover:hover){
-      .day:hover{
-        background: rgba(255,255,255,0.04);
-      }
-    }
-    .day:active{ transform: scale(0.98); }
-
-    /* сегодня: круг #C5D375 */
+    /* СЕГОДНЯ: Суббота 10 */
     .day.is-today .dom{
       width: 54px;
       height: 54px;
@@ -179,29 +165,15 @@
       color: rgba(255,255,255,0.94);
       font-weight: 600;
       background: transparent;
-      animation: ringPulse 1.9s ease-in-out infinite;
     }
 
-    @keyframes ringPulse{
-      0%   { box-shadow: 0 0 0 rgba(197,211,117,0.0); }
-      50%  { box-shadow: 0 8px 18px rgba(197,211,117,0.16); }
-      100% { box-shadow: 0 0 0 rgba(197,211,117,0.0); }
-    }
-
-    /* =========================
-       Responsive
-       ========================= */
+    /* Responsive */
     @media (max-width: 360px){
       .title{ font-size: 38px; }
       .calendar{ padding: 14px 16px; }
       .dow{ font-size: 15px; }
       .dom{ font-size: 28px; }
       .day.is-today .dom{ width: 50px; height: 50px; }
-    }
-
-    @media (min-width: 768px){
-      :root{ --space: 22px; }
-      .app{ max-width: 480px; }
     }
   </style>
 </head>
@@ -212,45 +184,48 @@
       <div class="top__row">
         <h1 class="title">Сегодня</h1>
 
-        <!-- XP rewards из репозитория GitHub -->
+        <!-- XP rewards -->
         <button class="xp" type="button" aria-label="Награды XP">
           <img 
             src="https://github.com/Galiya10/sprint-miniapp/raw/0188f6f0e6b40145849b86aa60b2ef9a1a447448/images/цветок_xp.png" 
-            alt=""
+            alt="xp"
           />
         </button>
       </div>
 
+      <!-- Календарь: 5-11 января 2026 -->
       <section class="calendar" aria-label="Календарь недели">
         <div class="calendar__grid" role="list">
-          <button class="day" type="button" role="listitem" aria-label="Понедельник, 4">
-            <div class="dow">пн</div><div class="dom">4</div>
+          
+          <button class="day" type="button">
+            <div class="dow">пн</div><div class="dom">5</div>
           </button>
 
-          <button class="day" type="button" role="listitem" aria-label="Вторник, 5">
-            <div class="dow">вт</div><div class="dom">5</div>
+          <button class="day" type="button">
+            <div class="dow">вт</div><div class="dom">6</div>
           </button>
 
-          <button class="day" type="button" role="listitem" aria-label="Среда, 6">
-            <div class="dow">ср</div><div class="dom">6</div>
+          <button class="day" type="button">
+            <div class="dow">ср</div><div class="dom">7</div>
           </button>
 
-          <button class="day" type="button" role="listitem" aria-label="Четверг, 7">
-            <div class="dow">чт</div><div class="dom">7</div>
+          <button class="day" type="button">
+            <div class="dow">чт</div><div class="dom">8</div>
           </button>
 
-          <button class="day" type="button" role="listitem" aria-label="Пятница, 8">
-            <div class="dow">пт</div><div class="dom">8</div>
+          <button class="day" type="button">
+            <div class="dow">пт</div><div class="dom">9</div>
           </button>
 
-          <button class="day is-muted" type="button" role="listitem" aria-label="Суббота, 9">
-            <div class="dow">сб</div><div class="dom">9</div>
+          <!-- СЕГОДНЯ: Суббота, 10 января -->
+          <button class="day is-today" type="button" aria-current="date">
+            <div class="dow">сб</div><div class="dom">10</div>
           </button>
 
-          <!-- Сегодня: суббота, 10 января -->
-          <button class="day is-muted is-today" type="button" role="listitem" aria-current="date" aria-label="Воскресенье, 10 (сегодня)">
-            <div class="dow">вс</div><div class="dom">10</div>
+          <button class="day is-muted" type="button">
+            <div class="dow">вс</div><div class="dom">11</div>
           </button>
+          
         </div>
       </section>
     </header>
