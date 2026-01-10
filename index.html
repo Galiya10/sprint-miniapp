@@ -1,301 +1,237 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Sprint — Habit Tracker</title>
-  
-  <!-- Google Fonts: Nunito (300, 400, 600, 700, 800) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  
-  <style>
-    /* ===========================
-       CSS Variables
-       =========================== */
-    :root {
-      /* Colors */
-      --bg-gradient-top: #2C3640;
-      --bg-gradient-bottom: #3A4450;
-      --accent-yellow-green: #C8D96F;
-      --text-white: #ffffff;
-      --text-light-gray: rgba(255, 255, 255, 0.50);
-      --text-dark-gray: rgba(255, 255, 255, 0.30);
-      --button-bg: rgba(255, 255, 255, 0.08);
-      
-      /* Typography */
-      --font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      
-      /* Spacing & Sizing */
-      --safe-top: 24px;
-      --safe-sides: 20px;
-      --safe-bottom: 32px;
-      --calendar-spacing: 40px;
-      --today-circle-size: 44px;
-      --button-height: 56px;
-      
-      /* Borders */
-      --radius-button: 16px;
-    }
-    
-    /* ===========================
-       Reset & Base
-       =========================== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: var(--font-family);
-      background: linear-gradient(180deg, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
-      color: var(--text-white);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden;
-    }
-    
-    /* ===========================
-       Main Container
-       =========================== */
-    .container {
-      width: 375px;
-      height: 812px;
-      margin: 0 auto;
-      padding: var(--safe-top) var(--safe-sides) var(--safe-bottom);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    
-    /* ===========================
-       Header Section
-       =========================== */
-    .header {
-      margin-bottom: 28px;
-    }
-    
-    .header__title {
-      font-size: 48px;
-      font-weight: 800;
-      color: var(--text-white);
-      line-height: 1.1;
-      letter-spacing: -1px;
-    }
-    
-    /* ===========================
-       Calendar Section
-       =========================== */
-    .calendar {
-      position: relative;
-      margin-bottom: var(--calendar-spacing);
-    }
-    
-    /* Settings Icon (Top Right) */
-    .calendar__settings {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 28px;
-      height: 28px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    
-    .calendar__settings:hover {
-      transform: rotate(45deg);
-    }
-    
-    .calendar__settings svg {
-      width: 100%;
-      height: 100%;
-      fill: none;
-      stroke: var(--accent-yellow-green);
-      stroke-width: 2;
-    }
-    
-    /* Calendar Grid */
-    .calendar__grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 16px 8px;
-      text-align: center;
-      padding-right: 40px; /* Space for settings icon */
-    }
-    
-    /* Days of Week Labels */
-    .calendar__dow {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-light-gray);
-      text-transform: lowercase;
-      letter-spacing: 0.3px;
-    }
-    
-    /* Date Numbers */
-    .calendar__date {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--text-white);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: var(--today-circle-size);
-      position: relative;
-    }
-    
-    /* Past dates (lighter) */
-    .calendar__date--past {
-      color: var(--text-white);
-    }
-    
-    /* Future dates (darker) */
-    .calendar__date--future {
-      color: var(--text-dark-gray);
-    }
-    
-    /* Today (Friday 8th): Yellow-green circle outline */
-    .calendar__date--today {
-      color: var(--text-white);
-      font-weight: 700;
-    }
-    
-    .calendar__date--today::before {
-      content: '';
-      position: absolute;
-      width: var(--today-circle-size);
-      height: var(--today-circle-size);
-      border: 2.5px solid var(--accent-yellow-green);
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 16px rgba(200, 217, 111, 0.25);
-    }
-    
-    /* ===========================
-       Add Habit Button
-       =========================== */
-    .add-button {
-      width: 100%;
-      height: var(--button-height);
-      background: var(--button-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: var(--radius-button);
-      color: var(--text-light-gray);
-      font-family: var(--font-family);
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .add-button::before {
-      content: '+';
-      font-size: 26px;
-      font-weight: 700;
-      line-height: 1;
-    }
-    
-    .add-button:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.20);
-    }
-    
-    .add-button:active {
-      transform: translateY(0);
-    }
-    
-    /* ===========================
-       Responsive Adjustments
-       =========================== */
-    @media (max-width: 375px) {
-      .container {
-        width: 100%;
-      }
-      
-      .header__title {
-        font-size: 42px;
-      }
-      
-      .calendar__grid {
-        gap: 12px 6px;
-      }
-    }
-    
-    @media (min-height: 813px) {
-      .container {
-        height: auto;
-        min-height: 812px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Habit Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(180deg, #2C3640 0%, #3A4450 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 375px;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px 32px 20px;
+            min-height: 812px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .calendar-section {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .settings-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+        }
+
+        .settings-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: #C8D96F;
+        }
+
+        .week-calendar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding-right: 40px;
+        }
+
+        .day-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .day-label {
+            font-size: 12px;
+            color: #8B95A0;
+            font-weight: 400;
+            text-transform: lowercase;
+        }
+
+        .day-date {
+            font-size: 20px;
+            font-weight: 700;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .day-date.past {
+            color: white;
+        }
+
+        .day-date.current {
+            color: white;
+            border: 2px solid #C8D96F;
+            box-shadow: 0 0 8px rgba(200, 217, 111, 0.3);
+        }
+
+        .day-date.future {
+            color: #5A6470;
+        }
+
+        .add-habit-button {
+            width: 100%;
+            padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 16px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 18px;
+            color: #B0B8C0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .add-habit-button:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-habit-button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 375px) {
+            .container {
+                width: 100%;
+            }
+
+            .day-date {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .week-calendar {
+                gap: 4px;
+            }
+        }
+    </style>
 </head>
 <body>
-  
-  <div class="container">
-    
-    <!-- Header -->
-    <header class="header">
-      <h1 class="header__title">Сегодня</h1>
-    </header>
-    
-    <!-- Calendar Section -->
-    <section class="calendar">
-      
-      <!-- Settings Icon (Top Right) -->
-      <button class="calendar__settings" aria-label="Настройки">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M13.5 2.5h-3l-.5 2.5c-.5.2-1 .4-1.5.7l-2.3-1.2-2.1 2.1 1.2 2.3c-.3.5-.5 1-.7 1.5l-2.5.5v3l2.5.5c.2.5.4 1 .7 1.5l-1.2 2.3 2.1 2.1 2.3-1.2c.5.3 1 .5 1.5.7l.5 2.5h3l.5-2.5c.5-.2 1-.4 1.5-.7l2.3 1.2 2.1-2.1-1.2-2.3c.3-.5.5-1 .7-1.5l2.5-.5v-3l-2.5-.5c-.2-.5-.4-1-.7-1.5l1.2-2.3-2.1-2.1-2.3 1.2c-.5-.3-1-.5-1.5-.7z"/>
-        </svg>
-      </button>
-      
-      <!-- Calendar Grid -->
-      <div class="calendar__grid">
-        
-        <!-- Days of Week -->
-        <div class="calendar__dow">пн</div>
-        <div class="calendar__dow">вт</div>
-        <div class="calendar__dow">ср</div>
-        <div class="calendar__dow">чт</div>
-        <div class="calendar__dow">пт</div>
-        <div class="calendar__dow">сб</div>
-        <div class="calendar__dow">вс</div>
-        
-        <!-- Dates (January 2026: Mon 5 - Sun 11) -->
-        <div class="calendar__date calendar__date--past">5</div>
-        <div class="calendar__date calendar__date--past">6</div>
-        <div class="calendar__date calendar__date--past">7</div>
-        
-        <!-- Today: Friday, January 8, 2026 -->
-        <div class="calendar__date calendar__date--today">8</div>
-        
-        <!-- Future dates -->
-        <div class="calendar__date calendar__date--future">9</div>
-        <div class="calendar__date calendar__date--future">10</div>
-        <div class="calendar__date calendar__date--future">11</div>
-        
-      </div>
-    </section>
-    
-    <!-- Add Habit Button -->
-    <button class="add-button" type="button">
-      добавить новую привычку
-    </button>
-    
-  </div>
-  
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Сегодня</h1>
+        </div>
+
+        <div class="calendar-section">
+            <div class="settings-icon" onclick="openSettings()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+            </div>
+
+            <div class="week-calendar">
+                <div class="day-item">
+                    <span class="day-label">пн</span>
+                    <div class="day-date past">4</div>
+                </div>
+                <div class="day-item">
+                    <span class="day-label">вт</span>
+                    <div class="day-date past">5</div>
+                </div>
+                <div class="day-item">
+                    <span class="day-label">ср</span>
+                    <div class="day-date past">6</div>
+                </div>
+                <div class="day-item">
+                    <span class="day-label">чт</span>
+                    <div class="day-date past">7</div>
+                </div>
+                <div class="day-item">
+                    <span class="day-label">пт</span>
+                    <div class="day-date current">8</div>
+                </div>
+                <div class="day-item">
+                    <span class="day-label">сб</span>
+                    <div class="day-date future">9</div>
+                </div>
+                <div class="day-item">
+                    <span class="day-label">вс</span>
+                    <div class="day-date future">10</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="add-habit-button" onclick="addHabit()">
+            + добавить новую привычку
+        </button>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        // Функция добавления привычки
+        function addHabit() {
+            // Здесь можно добавить логику открытия формы добавления привычки
+            tg.showAlert('Открытие формы добавления новой привычки');
+            // или отправить событие в бота
+            // tg.sendData(JSON.stringify({action: 'add_habit'}));
+        }
+
+        // Функция настроек
+        function openSettings() {
+            tg.showAlert('Открытие настроек');
+            // или навигация на страницу настроек
+        }
+
+        // Обработка кликов по датам
+        document.querySelectorAll('.day-date').forEach(date => {
+            date.addEventListener('click', function() {
+                const selectedDate = this.textContent;
+                console.log('Выбрана дата:', selectedDate);
+                // Здесь можно добавить логику переключения дней
+            });
+        });
+    </script>
 </body>
 </html>
