@@ -2,523 +2,265 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Habit Tracker — Today</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+  />
+  <title>Сегодня — Habit Tracker</title>
 
-  <!-- Nunito (300/400/600/700/800) from Google Fonts -->
+  <!-- Nunito (300/400/600/700/800) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     /* =========================
-       Design tokens (CSS vars)
+       Tokens
        ========================= */
     :root{
-      --bg: #1f2a33;
-      --surface: rgba(255,255,255,0.06);
-      --surface-2: rgba(255,255,255,0.08);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.55);
-      --muted-2: rgba(255,255,255,0.40);
-      --line: rgba(255,255,255,0.10);
+      --bg: #1f2a33;                /* фон */
+      --panel: #2a3640;             /* плашка календаря */
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.50);
+      --muted-strong: rgba(255,255,255,.62);
 
-      --accent: #c9de6e;
-      --accent-2: #7aa86a;
+      --accent: #C5D375;            /* цвет круга "сегодня" */
+      --radius: 20px;
 
-      --shadow: 0 4px 12px rgba(0,0,0,0.10);
-
-      --r12: 12px;
       --space: 16px;
-      --gap: 24px;
+      --header-h: 96px;             /* визуально как на примере: крупный отступ сверху */
+      --cal-h: 116px;
 
-      --header-h: 60px;
-      --cal-h: 72px;
-      --btn-h: 56px;
-
-      --day-size: 40px;
+      /* Важно для Telegram mini app на Android: сверху есть Telegram header ("Закрыть" и т.д.)
+         Дай небольшой запас + safe-area. */
+      --tg-top: 44px;
     }
 
-    /* =========================
-       Base
-       ========================= */
     *{ box-sizing: border-box; }
     html, body{ height: 100%; }
     body{
       margin: 0;
       font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 70% -10%, rgba(255,255,255,0.06), transparent 55%),
-                  var(--bg);
+      background: var(--bg);
       color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Layout container: mobile-first, centered on desktop */
     .app{
-      min-height: 100%;
-      max-width: 480px;
+      max-width: 420px;
       margin: 0 auto;
-      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+      padding: 0 var(--space);
     }
 
     /* =========================
-       Top header (fixed)
+       Top area
        ========================= */
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      height: var(--header-h);
+    .top{
+      padding-top: calc(var(--tg-top) + env(safe-area-inset-top));
+      padding-bottom: 14px;
+    }
+
+    .top__row{
       display: flex;
-      align-items: flex-end;
-      padding: 10px var(--space) 10px;
-      background: linear-gradient(to bottom, rgba(31,42,51,0.92), rgba(31,42,51,0.72));
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,0.00);
-      transition: box-shadow .2s ease, border-color .2s ease;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: var(--header-h);
     }
-    .topbar.is-scrolled{
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-      border-color: rgba(255,255,255,0.08);
-    }
+
     .title{
       margin: 0;
-      font-size: 28px;
       font-weight: 800;
-      letter-spacing: -0.5px;
-      line-height: 1;
+      font-size: 64px;             /* как на скрине — очень крупно */
+      letter-spacing: -1.2px;
+      line-height: 0.95;
     }
 
-    /* =========================
-       Content spacing
-       ========================= */
-    main{
-      padding: var(--space);
-      padding-top: calc(var(--space) + 6px);
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap);
+    /* XP flower button */
+    .xp{
+      width: 92px;
+      height: 44px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      place-items: center;
+      padding: 0;
+      cursor: pointer;
+      transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
     }
 
+    .xp img{
+      width: 26px;
+      height: 26px;
+      display: block;
+    }
+
+    @media (hover:hover){
+      .xp:hover{
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.10);
+        transform: scale(1.02);
+      }
+    }
+    .xp:active{ transform: scale(0.98); }
+
     /* =========================
-       Calendar strip
+       Calendar panel
        ========================= */
     .calendar{
-      background: var(--surface);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--r12);
       height: var(--cal-h);
-      padding: 10px 10px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .calendar::-webkit-scrollbar{ display:none; }
-
-    .calendar__row{
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 22px 22px;
       display: flex;
-      gap: 12px;
       align-items: center;
-      min-width: max-content;
-      height: 100%;
-      padding: 2px 6px;
+    }
+
+    .calendar__grid{
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
     }
 
     .day{
-      width: 46px;
-      flex: 0 0 46px;
+      flex: 1 1 0;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border-radius: 10px;
+      gap: 18px;
+      border-radius: 14px;
+      padding: 8px 0;
       border: 1px solid transparent;
       background: transparent;
       color: var(--text);
+      font: inherit;
       cursor: pointer;
       transition: background-color .18s ease, transform .18s ease, border-color .18s ease;
       user-select: none;
     }
 
     .dow{
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--muted);
-      line-height: 1;
-    }
-    .dom{
-      font-size: 16px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.82);
-      line-height: 1;
-      display: grid;
-      place-items: center;
-      width: var(--day-size);
-      height: var(--day-size);
-      border-radius: 999px;
+      font-size: 22px;             /* как на примере — крупные буквы */
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: rgba(255,255,255,0.86);
+      text-transform: lowercase;
     }
 
-    /* Hover/active for day cells (desktop) */
+    .dom{
+      font-size: 44px;             /* крупные цифры как на примере */
+      font-weight: 400;
+      line-height: 1;
+      color: rgba(255,255,255,0.86);
+    }
+
+    /* приглушённые (сб/вс) как на скрине */
+    .day.is-muted .dow,
+    .day.is-muted .dom{
+      color: rgba(255,255,255,0.35);
+    }
+
     @media (hover:hover){
       .day:hover{
-        background: rgba(255,255,255,0.06);
-        border-color: rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.07);
       }
     }
     .day:active{ transform: scale(0.98); }
 
-    /* Selected day (today) */
-    .day.is-today .dow{ color: rgba(255,255,255,0.70); }
+    /* выбранный день: обводка кругом #C5D375 */
     .day.is-today .dom{
-      font-size: 18px;
-      font-weight: 700;
-      background: rgba(201,222,110,0.24);
-      color: #ffffff;
-      box-shadow: 0 10px 22px rgba(201,222,110,0.10);
-      outline: 1px solid rgba(201,222,110,0.35);
-      animation: pulse 1.8s ease-in-out infinite;
-    }
-
-    @keyframes pulse{
-      0%   { box-shadow: 0 10px 22px rgba(201,222,110,0.12); }
-      50%  { box-shadow: 0 10px 22px rgba(201,222,110,0.26); }
-      100% { box-shadow: 0 10px 22px rgba(201,222,110,0.12); }
-    }
-
-    /* =========================
-       Primary button (Add habit / CTA)
-       ========================= */
-    .btn{
-      height: var(--btn-h);
-      width: 100%;
-      border: 0;
-      border-radius: var(--r12);
-      background: rgba(122,168,106,0.42);
-      color: #fff;
-      font-size: 16px;
+      width: 74px;
+      height: 74px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 3px solid var(--accent);
+      color: rgba(255,255,255,0.92);
       font-weight: 600;
-      letter-spacing: 0.1px;
-      box-shadow: var(--shadow);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: transform .18s ease, filter .18s ease, background-color .18s ease;
-      position: relative;
-      outline: none;
-    }
-    .btn::before{
-      content: "+";
-      font-weight: 800;
-      font-size: 18px;
-      line-height: 1;
-      display: grid;
-      place-items: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.12);
-    }
-    @media (hover:hover){
-      .btn:hover{ filter: brightness(0.95); transform: scale(1.02); }
-    }
-    .btn:active{ transform: scale(0.98); }
-
-    /* =========================
-       Divider
-       ========================= */
-    .divider{
-      height: 1px;
-      width: 100%;
-      background: var(--line);
-      border: 0;
-      margin: 0;
-    }
-
-    /* =========================
-       Sprint onboarding card (empty state)
-       ========================= */
-    .empty{
-      background: rgba(0,0,0,0.14);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--r12);
-      padding: 14px 14px 16px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-end;
-    }
-
-    .avatar{
-      flex: 0 0 80px;
-      width: 80px;
-      height: 80px;
-      border-radius: 999px;
-      background: rgba(201,222,110,0.22);
-      display: grid;
-      place-items: center;
-      box-shadow: 0 10px 22px rgba(0,0,0,0.16);
-      border: 1px solid rgba(201,222,110,0.28);
-    }
-    .avatar span{
-      font-size: 34px;
-      line-height: 1;
-      filter: saturate(1.05);
-    }
-
-    .empty__content{
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .empty__title{
-      margin: 0;
-      font-size: 24px;
-      font-weight: 800;
-      line-height: 1.05;
-    }
-    .empty__hello{
-      margin: 0;
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.90);
-    }
-    .empty__desc{
-      margin: 0;
-      font-size: 14px;
-      font-weight: 300;
-      line-height: 1.45;
-      color: var(--muted);
-      max-width: 280px;
-    }
-
-    /* Close button (optional) */
-    .empty__close{
-      align-self: flex-start;
-      margin-left: auto;
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.16);
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.85);
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
-    }
-    @media (hover:hover){
-      .empty__close:hover{
-        background: rgba(255,255,255,0.10);
-        border-color: rgba(255,255,255,0.22);
-        transform: scale(1.05);
-      }
-    }
-    .empty__close:active{ transform: scale(0.96); }
-
-    /* CTA inside onboarding */
-    .btn--cta{
-      margin-top: 10px;
-      background: rgba(122,168,106,0.46);
-    }
-    .btn--cta::before{ content: "🌱"; font-size: 16px; }
-
-    /* =========================
-       Bottom navigation
-       ========================= */
-    .nav{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 60;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-      background: linear-gradient(to top, rgba(0,0,0,0.34), rgba(0,0,0,0.10));
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255,255,255,0.10);
-      display: flex;
-      justify-content: center;
-    }
-    .nav__inner{
-      width: min(480px, 100%);
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .tab{
-      flex: 1;
-      border: 0;
       background: transparent;
-      color: var(--muted);
-      padding: 8px 6px;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: background-color .18s ease, transform .18s ease, color .18s ease;
-      font: inherit;
-    }
-    .tab__icon{
-      width: 22px;
-      height: 22px;
-      border-radius: 7px;
-      background: rgba(255,255,255,0.10);
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      color: rgba(255,255,255,0.85);
-    }
-    .tab__label{
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.1px;
+      box-shadow: 0 0 0 rgba(197,211,117,0.0);
+      animation: ringPulse 1.9s ease-in-out infinite;
     }
 
-    @media (hover:hover){
-      .tab:hover{ background: rgba(255,255,255,0.06); }
-    }
-    .tab:active{ transform: scale(0.98); }
-
-    .tab.is-active{
-      color: rgba(201,222,110,0.95);
-    }
-    .tab.is-active .tab__icon{
-      background: rgba(201,222,110,0.22);
-      outline: 1px solid rgba(201,222,110,0.24);
+    @keyframes ringPulse{
+      0%   { box-shadow: 0 0 0 0 rgba(197,211,117,0.0); }
+      50%  { box-shadow: 0 10px 22px 0 rgba(197,211,117,0.14); }
+      100% { box-shadow: 0 0 0 0 rgba(197,211,117,0.0); }
     }
 
     /* =========================
-       Responsive rules
+       Responsive
        ========================= */
-    @media (min-width: 768px){
-      :root{ --space: 20px; --gap: 28px; }
-      .calendar{ overflow: hidden; }
-      .calendar__row{ justify-content: space-between; min-width: 100%; }
+    @media (max-width: 360px){
+      .title{ font-size: 56px; }
+      .calendar{ padding: 18px 16px; }
+      .dow{ font-size: 20px; }
+      .dom{ font-size: 40px; }
+      .day.is-today .dom{ width: 68px; height: 68px; }
     }
-    @media (min-width: 1024px){
-      body{ padding: 24px 0; }
-      .nav{ left: 50%; transform: translateX(-50%); width: min(480px, 100%); border-radius: 18px 18px 0 0; }
+
+    @media (min-width: 768px){
+      :root{ --space: 22px; }
+      .app{ max-width: 480px; }
     }
   </style>
 </head>
 
 <body>
   <div class="app">
-    <header class="topbar" id="topbar">
-      <h1 class="title">Сегодня</h1>
-    </header>
+    <header class="top">
+      <div class="top__row">
+        <h1 class="title">Сегодня</h1>
 
-    <main>
-      <!-- Calendar strip -->
-      <section class="calendar" aria-label="Календарь на неделю">
-        <div class="calendar__row" role="list">
+        <!-- XP rewards: вставь сюда файл из репозитория -->
+        <button class="xp" type="button" aria-label="Награды XP">
+          <img src="assets/цветок_xp.png" alt="" />
+        </button>
+      </div>
+
+      <section class="calendar" aria-label="Календарь недели">
+        <div class="calendar__grid" role="list">
           <button class="day" type="button" role="listitem" aria-label="Понедельник, 4">
-            <div class="dow">ПН</div>
-            <div class="dom">4</div>
+            <div class="dow">пн</div><div class="dom">4</div>
           </button>
 
           <button class="day" type="button" role="listitem" aria-label="Вторник, 5">
-            <div class="dow">ВТ</div>
-            <div class="dom">5</div>
+            <div class="dow">вт</div><div class="dom">5</div>
           </button>
 
           <button class="day" type="button" role="listitem" aria-label="Среда, 6">
-            <div class="dow">СР</div>
-            <div class="dom">6</div>
+            <div class="dow">ср</div><div class="dom">6</div>
           </button>
 
-          <button class="day is-today" type="button" role="listitem" aria-current="date" aria-label="Четверг, 7 (сегодня)">
-            <div class="dow">ЧТ</div>
-            <div class="dom">7</div>
+          <button class="day" type="button" role="listitem" aria-label="Четверг, 7">
+            <div class="dow">чт</div><div class="dom">7</div>
           </button>
 
           <button class="day" type="button" role="listitem" aria-label="Пятница, 8">
-            <div class="dow">ПТ</div>
-            <div class="dom">8</div>
+            <div class="dow">пт</div><div class="dom">8</div>
           </button>
 
-          <button class="day" type="button" role="listitem" aria-label="Суббота, 9">
-            <div class="dow">Сб</div>
-            <div class="dom">9</div>
+          <button class="day is-muted" type="button" role="listitem" aria-label="Суббота, 9">
+            <div class="dow">сб</div><div class="dom">9</div>
           </button>
 
-          <button class="day" type="button" role="listitem" aria-label="Воскресенье, 10">
-            <div class="dow">ВС</div>
-            <div class="dom">10</div>
+          <!-- Сегодня: 10 января -->
+          <button class="day is-muted is-today" type="button" role="listitem" aria-current="date" aria-label="Воскресенье, 10 (сегодня)">
+            <div class="dow">вс</div><div class="dom">10</div>
           </button>
         </div>
       </section>
-
-      <!-- Add habit -->
-      <button class="btn" type="button" aria-label="Добавить новую привычку">
-        добавить новую привычку
-      </button>
-
-      <hr class="divider" aria-hidden="true" />
-
-      <!-- Empty state: Sprint onboarding (show when no habits) -->
-      <section class="empty" aria-label="Онбординг Спринт">
-        <div class="avatar" aria-hidden="true"><span>🦥</span></div>
-
-        <div class="empty__content">
-          <h2 class="empty__title">Спринт</h2>
-          <p class="empty__hello">Привет! Я Спринт, твой садовник привычек.</p>
-          <p class="empty__desc">Посади свою первую привычку — поливать будем вместе</p>
-
-          <button class="btn btn--cta" type="button" aria-label="Создать первую привычку">
-            Создать первую привычку
-          </button>
-        </div>
-
-        <button class="empty__close" type="button" aria-label="Закрыть онбординг">×</button>
-      </section>
-    </main>
+    </header>
   </div>
 
-  <!-- Bottom nav -->
-  <nav class="nav" aria-label="Навигация">
-    <div class="nav__inner">
-      <button class="tab is-active" type="button" aria-current="page">
-        <div class="tab__icon">📅</div>
-        <div class="tab__label">сегодня</div>
-      </button>
-
-      <button class="tab" type="button">
-        <div class="tab__icon">👥</div>
-        <div class="tab__label">дуэль</div>
-      </button>
-
-      <button class="tab" type="button">
-        <div class="tab__icon">⚙️</div>
-        <div class="tab__label">сад</div>
-      </button>
-
-      <button class="tab" type="button">
-        <div class="tab__icon">📊</div>
-        <div class="tab__label">история</div>
-      </button>
-    </div>
-  </nav>
-
   <script>
-    // Sticky header shadow on scroll
-    const topbar = document.getElementById('topbar');
-    const onScroll = () => topbar.classList.toggle('is-scrolled', window.scrollY > 2);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    // Optional: close onboarding
-    const closeBtn = document.querySelector('.empty__close');
-    const empty = document.querySelector('.empty');
-    closeBtn?.addEventListener('click', () => empty?.remove());
+    // При желании можно здесь подключить Telegram.WebApp и брать реальные safe-area/viewport параметры,
+    // но верстка уже учитывает верхний Telegram header через --tg-top.
   </script>
 </body>
 </html>
