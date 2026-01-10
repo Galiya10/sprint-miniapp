@@ -1,93 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Трекер привычек</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Habit Mini App Mock</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Вставьте CSS из следующего блока сюда */
+</style>
 </head>
 <body>
-    <div id="app">
-        <!-- Хедер -->
-        <header>
-            <h1>Сегодня</h1>
-            <button class="settings-icon">🌸</button>
-        </header>
-
-        <!-- Календарь недели -->
-        <div class="week-calendar">
-            <div class="week-day">
-                <span class="day-label">пн</span>
-                <span class="day-number">4</span>
-            </div>
-            <div class="week-day">
-                <span class="day-label">вт</span>
-                <span class="day-number">5</span>
-            </div>
-            <div class="week-day">
-                <span class="day-label">ср</span>
-                <span class="day-number">6</span>
-            </div>
-            <div class="week-day">
-                <span class="day-label">чт</span>
-                <span class="day-number">7</span>
-            </div>
-            <div class="week-day active">
-                <span class="day-label">пт</span>
-                <span class="day-number">8</span>
-            </div>
-            <div class="week-day future">
-                <span class="day-label">сб</span>
-                <span class="day-number">9</span>
-            </div>
-            <div class="week-day future">
-                <span class="day-label">вс</span>
-                <span class="day-number">10</span>
-            </div>
-        </div>
-
-        <!-- Кнопка добавления привычки -->
-        <button id="add-habit-btn" class="add-habit-btn">
-            + добавить новую привычку
-        </button>
-
-        <!-- Список привычек (пустой, будет заполняться JS) -->
-        <div id="habits-list" class="habits-list"></div>
-
-        <!-- Маскот Спринт -->
-        <div id="sprint-mascot" class="sprint-mascot">
-            <div class="mascot-bubble">
-                <div class="mascot-badge">Спринт</div>
-                <p class="mascot-text">Привет! Я Спринт, твой садовник привычек. Посади свою первую привычку - поливать будем вместе</p>
-                <button class="mascot-close-btn">×</button>
-            </div>
-            <div class="mascot-avatar">
-                <img src="sprint.jpg" alt="Спринт">
-            </div>
-        </div>
-
-        <!-- Нижняя навигация -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-screen="today">
-                <div class="nav-icon">📅</div>
-                <div class="nav-label">сегодня</div>
-            </button>
-            <button class="nav-item" data-screen="duel">
-                <div class="nav-icon">👥</div>
-                <div class="nav-label">дуэль</div>
-            </button>
-            <button class="nav-item" data-screen="garden">
-                <div class="nav-icon">🌸</div>
-                <div class="nav-label">сад</div>
-            </button>
-            <button class="nav-item" data-screen="stats">
-                <div class="nav-icon">📊</div>
-                <div class="nav-label">история</div>
-            </button>
-        </nav>
+<div class="app">
+  <header class="topbar">
+    <div class="date-block">
+      <div class="weekday">пт</div>
+      <div class="day">8</div>
+      <div class="month">янв</div>
     </div>
+    <div class="title">Сегодня</div>
+  </header>
 
-    <script src="app.js"></script>
+  <main class="content">
+    <section class="calendar">
+      <div class="weekdays">
+        <div>пн</div><div>вт</div><div>ср</div><div>чт</div><div class="active">пт</div><div>сб</div><div>вс</div>
+      </div>
+      <div class="days">
+        <div class="day-cell">3</div><div class="day-cell">4</div><div class="day-cell">5</div>
+        <div class="day-cell">6</div><div class="day-cell active">8</div><div class="day-cell">9</div><div class="day-cell">10</div>
+      </div>
+    </section>
+
+    <button class="add-btn">+ добавить новую привычку</button>
+
+    <section class="character-card">
+      <div class="avatar">
+        <!-- стилизованный placeholder для персонажа -->
+        <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0" stop-color="#FFD27A"/>
+              <stop offset="1" stop-color="#FF9AA2"/>
+            </linearGradient>
+          </defs>
+          <rect rx="20" width="96" height="96" fill="url(#g1)"/>
+          <g transform="translate(12,18)" fill="#5B3E2B">
+            <ellipse cx="36" cy="30" rx="18" ry="14"/>
+            <circle cx="26" cy="24" r="3" fill="#FFF"/>
+            <circle cx="46" cy="24" r="3" fill="#FFF"/>
+          </g>
+        </svg>
+      </div>
+      <div class="char-text">
+        <div class="name">Спринт</div>
+        <div class="message">Привет! Я Спринт, твой садовник привычек. Посади свою первую привычку - поливать будем вместе</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
+      <span>сегодня</span>
+    </button>
+    <button class="nav-item">
+      <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>
+      <span>дуэль</span>
+    </button>
+    <button class="nav-item">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>сад</span>
+    </button>
+    <button class="nav-item">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+      <span>история</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+/* Вставьте JS из следующего блока сюда */
+</script>
 </body>
 </html>
