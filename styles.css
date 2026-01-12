@@ -46,24 +46,28 @@ body {
     color: #FFFFFF;
 }
 
-.rewards-btn {
+.xp-btn {
     background: none;
     border: none;
     padding: 0;
     cursor: pointer;
-    width: 44px;
-    height: 44px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
 }
 
-.rewards-icon {
-    width: 32px;
-    height: 32px;
+.xp-icon {
+    width: 24px;
+    height: 24px;
 }
 
-/* Week Calendar - Scrollable */
+.xp-count {
+    font-size: 18px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+/* Week Calendar - Scrollable by weeks */
 .calendar-wrapper {
     overflow-x: auto;
     overflow-y: hidden;
@@ -71,6 +75,7 @@ body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
 }
 
 .calendar-wrapper::-webkit-scrollbar {
@@ -84,13 +89,22 @@ body {
     padding: 4px 0;
 }
 
+.week-group {
+    display: flex;
+    gap: 8px;
+    scroll-snap-align: start;
+    min-width: 100%;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
 .day-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-width: 52px;
+    min-width: 48px;
     min-height: 76px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -101,6 +115,7 @@ body {
 }
 
 .day-label {
+    font-family: 'Nunito', sans-serif;
     font-size: 14px;
     font-weight: 500;
     line-height: 17px;
@@ -109,6 +124,7 @@ body {
 }
 
 .day-number {
+    font-family: 'Nunito', sans-serif;
     font-size: 20px;
     font-weight: 600;
     line-height: 24px;
@@ -147,6 +163,62 @@ body {
 .day-item.future .day-label,
 .day-item.future .day-number {
     color: #A7A7A7;
+}
+
+/* Habits List */
+.habits-list {
+    margin-bottom: 16px;
+}
+
+.user-habit-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: #3E4A5A;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.user-habit-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.user-habit-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+.user-habit-xp {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #A7A7A7;
+}
+
+.user-habit-check {
+    background: none;
+    border: 2px solid #C5D375;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #C5D375;
+    transition: all 0.2s ease;
+}
+
+.user-habit-check.completed {
+    background-color: #C5D375;
+    color: #1A1A1A;
 }
 
 /* Add Habit Button */
@@ -327,39 +399,11 @@ body {
     z-index: 200;
     overflow-y: auto;
     padding-top: var(--safe-area-top);
-    padding-bottom: var(--safe-area-bottom);
-}
-
-.habits-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px;
-    background-color: #2C3744;
-    position: sticky;
-    top: var(--safe-area-top);
-    z-index: 10;
-}
-
-.back-btn {
-    background: none;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.habits-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #FFFFFF;
+    padding-bottom: calc(80px + var(--safe-area-bottom));
 }
 
 .habits-content {
-    padding: 0 16px 24px 16px;
+    padding: 20px 16px 24px 16px;
 }
 
 .category-section {
@@ -367,6 +411,7 @@ body {
 }
 
 .category-title {
+    font-family: 'Nunito', sans-serif;
     font-size: 20px;
     font-weight: 600;
     color: #FFFFFF;
@@ -405,6 +450,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     cursor: pointer;
     font-family: 'Nunito', sans-serif;
     font-size: 16px;
@@ -436,15 +482,25 @@ body {
 }
 
 .habit-name {
+    font-family: 'Nunito', sans-serif;
     font-size: 16px;
     font-weight: 500;
     color: #FFFFFF;
 }
 
 .habit-xp {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Nunito', sans-serif;
     font-size: 14px;
     font-weight: 400;
     color: #A7A7A7;
+}
+
+.xp-flower {
+    width: 16px;
+    height: 16px;
 }
 
 .habit-add-btn {
@@ -470,7 +526,7 @@ body {
     }
     
     .day-item {
-        min-width: 48px;
+        min-width: 44px;
         padding: 8px 6px;
     }
 }
