@@ -9,6 +9,11 @@ if (tg) {
     tg.enableClosingConfirmation();
 }
 
+// Хранилище данных
+let userHabits = JSON.parse(localStorage.getItem('userHabits')) || [];
+let userXP = parseInt(localStorage.getItem('userXP')) || 0;
+let habitCompletions = JSON.parse(localStorage.getItem('habitCompletions')) || {};
+
 // Получаем текущую дату
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -48,7 +53,21 @@ function isFuture(date) {
     return date > today;
 }
 
-// Генерируем календарь на несколько недель для скролла
+// Обновление счетчика XP
+function updateXPDisplay() {
+    document.getElementById('xpCount').textContent = userXP;
+}
+
+// Проверка, нужно ли показывать Спринта
+function checkSprintVisibility() {
+    if (userHabits.length === 0) {
+        document.getElementById('sprintCard').classList.remove('hidden');
+    } else {
+        document.getElementById('sprintCard').classList.add('hidden');
+    }
+}
+
+// Генерируем календарь по неделям
 function generateWeekCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
     const dayLabels = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
@@ -61,10 +80,11 @@ function generateWeekCalendar() {
     startDate.setDate(startDate.getDate() - 14); // 2 недели назад
     const weekStart = getWeekStart(startDate);
     
-    let scrollToElement = null;
-    
-    // Создаем дни для 4 недель
+    // Создаем группы недель
     for (let weekOffset = 0; weekOffset < 4; weekOffset++) {
+        const weekGroup = document.createElement('div');
+        weekGroup.className = 'week-group';
+        
         for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
             const date = new Date(weekStart);
             date.setDate(weekStart.getDate() + (weekOffset * 7) + dayOffset);
@@ -84,11 +104,6 @@ function generateWeekCalendar() {
                 dayItem.classList.add('future');
             }
             
-            // Запоминаем элемент сегодняшнего дня для скролла
-            if (isSameDate(date, today) && !scrollToElement) {
-                scrollToElement = dayItem;
-            }
-            
             const dayLabel = document.createElement('span');
             dayLabel.className = 'day-label';
             dayLabel.textContent = dayLabels[(dayOffset + 1) % 7];
@@ -99,7 +114,7 @@ function generateWeekCalendar() {
             
             dayItem.appendChild(dayLabel);
             dayItem.appendChild(dayNumber);
-            weekCalendar.appendChild(dayItem);
+            weekGroup.appendChild(dayItem);
             
             // Добавляем обработчик клика
             dayItem.addEventListener('click', () => {
@@ -128,20 +143,105 @@ function generateWeekCalendar() {
                     tg.HapticFeedback.impactOccurred('light');
                 }
                 
-                console.log('Selected date:', formatDate(date));
+                // Обновляем отображение привычек для выбранной даты
+                renderUserHabits();
             });
         }
+        
+        weekCalendar.appendChild(weekGroup);
     }
     
-    // Скроллим к сегодняшнему дню
-    if (scrollToElement) {
-        setTimeout(() => {
-            scrollToElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'nearest', 
-                inline: 'center' 
-            });
-        }, 100);
+    // Скроллим к текущей неделе
+    setTimeout(() => {
+        const todayElement = document.querySelector('.day-item.today, .day-item.selected');
+        if (todayElement) {
+            const weekGroup = todayElement.closest('.week-group');
+            if (weekGroup) {
+                weekGroup.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest', 
+                    inline: 'center' 
+                });
+            }
+        }
+    }, 100);
+}
+
+// Отображение привычек пользователя
+function renderUserHabits() {
+    const habitsList = document.getElementById('habitsList');
+    habitsList.innerHTML = '';
+    
+    const selectedDateStr = formatDate(selectedDate);
+    
+    userHabits.forEach((habit, index) => {
+        const habitItem = document.createElement('div');
+        habitItem.className = 'user-habit-item';
+        
+        const isCompleted = habitCompletions[selectedDateStr]?.[habit.name] || false;
+        
+        habitItem.innerHTML = `
+            <div class="user-habit-info">
+                <span class="user-habit-name">${habit.name}</span>
+                <div class="user-habit-xp">
+                    <span>${habit.xp}</span>
+                    <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
+                </div>
+            </div>
+            <button class="user-habit-check ${isCompleted ? 'completed' : ''}" data-index="${index}">
+                ${isCompleted ? '✓' : ''}
+            </button>
+        `;
+        
+        const checkBtn = habitItem.querySelector('.user-habit-check');
+        checkBtn.addEventListener('click', () => toggleHabitCompletion(habit, selectedDateStr, checkBtn));
+        
+        habitsList.appendChild(habitItem);
+    });
+}
+
+// Переключение выполнения привычки
+function toggleHabitCompletion(habit, dateStr, btnElement) {
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('medium');
+    }
+    
+    if (!habitCompletions[dateStr]) {
+        habitCompletions[dateStr] = {};
+    }
+    
+    const isCurrentlyCompleted = habitCompletions[dateStr][habit.name] || false;
+    
+    if (!isCurrentlyCompleted) {
+        // Отмечаем как выполненную
+        habitCompletions[dateStr][habit.name] = true;
+        userXP += habit.xp;
+        btnElement.classList.add('completed');
+        btnElement.textContent = '✓';
+    } else {
+        // Отменяем выполнение
+        habitCompletions[dateStr][habit.name] = false;
+        userXP -= habit.xp;
+        btnElement.classList.remove('completed');
+        btnElement.textContent = '';
+    }
+    
+    // Сохраняем в localStorage
+    localStorage.setItem('habitCompletions', JSON.stringify(habitCompletions));
+    localStorage.setItem('userXP', userXP.toString());
+    
+    updateXPDisplay();
+}
+
+// Добавление привычки
+function addHabit(habitData) {
+    userHabits.push(habitData);
+    localStorage.setItem('userHabits', JSON.stringify(userHabits));
+    renderUserHabits();
+    checkSprintVisibility();
+    
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred('success');
     }
 }
 
@@ -156,26 +256,6 @@ document.getElementById('addHabitBtn').addEventListener('click', () => {
     document.getElementById('habitsPage').classList.remove('hidden');
 });
 
-// Обработчик для кнопки "Назад"
-document.getElementById('backBtn').addEventListener('click', () => {
-    if (tg?.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('light');
-    }
-    
-    // Возвращаемся на главную страницу
-    document.getElementById('habitsPage').classList.add('hidden');
-    document.getElementById('mainPage').classList.remove('hidden');
-});
-
-// Обработчик для кнопки наград
-document.querySelector('.rewards-btn').addEventListener('click', () => {
-    if (tg?.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('light');
-    }
-    
-    console.log('Открыть награды');
-});
-
 // Обработчик для закрытия карточки Спринта
 document.getElementById('closeSprintCard').addEventListener('click', () => {
     const sprintCard = document.getElementById('sprintCard');
@@ -184,34 +264,86 @@ document.getElementById('closeSprintCard').addEventListener('click', () => {
     if (tg?.HapticFeedback) {
         tg.HapticFeedback.impactOccurred('light');
     }
-    
-    localStorage.setItem('sprintCardHidden', 'true');
 });
 
-// Проверяем, была ли карточка скрыта ранее
-if (localStorage.getItem('sprintCardHidden') === 'true') {
-    document.getElementById('sprintCard').classList.add('hidden');
-}
+// Обработчики кнопок добавления привычек
+document.querySelectorAll('.habit-add-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const habitItem = e.target.closest('.habit-item');
+        const habitData = JSON.parse(habitItem.dataset.habit);
+        
+        // Проверяем, не добавлена ли уже эта привычка
+        const exists = userHabits.some(h => h.name === habitData.name);
+        if (!exists) {
+            addHabit(habitData);
+            
+            // Возвращаемся на главную страницу
+            document.getElementById('habitsPage').classList.add('hidden');
+            document.getElementById('mainPage').classList.remove('hidden');
+        } else {
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('error');
+            }
+            alert('Эта привычка уже добавлена!');
+        }
+    });
+});
 
-// Обработчики для навигации
-document.querySelectorAll('.nav-item').forEach((navItem) => {
+// Обработчики для навигации на главной странице
+document.querySelectorAll('#mainPage .nav-item').forEach((navItem) => {
     navItem.addEventListener('click', () => {
         if (tg?.HapticFeedback) {
             tg.HapticFeedback.impactOccurred('light');
         }
         
-        document.querySelectorAll('.nav-item').forEach(item => {
+        document.querySelectorAll('#mainPage .nav-item').forEach(item => {
             item.classList.remove('active');
         });
         navItem.classList.add('active');
         
         const page = navItem.getAttribute('data-page');
+        
+        // Если нажали на "сегодня" из другой вкладки
+        if (page === 'today') {
+            // Уже на главной странице
+        }
+        
         console.log(`Навигация: ${page}`);
     });
 });
 
-// Инициализируем календарь
+// Обработчики для навигации на странице привычек
+document.querySelectorAll('#habitsPage .nav-item').forEach((navItem) => {
+    navItem.addEventListener('click', () => {
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        const page = navItem.getAttribute('data-page');
+        
+        // Если нажали на "сегодня"
+        if (page === 'today') {
+            document.getElementById('habitsPage').classList.add('hidden');
+            document.getElementById('mainPage').classList.remove('hidden');
+            
+            // Активируем правильный пункт навигации на главной странице
+            document.querySelectorAll('#mainPage .nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === 'today') {
+                    item.classList.add('active');
+                }
+            });
+        }
+        
+        console.log(`Навигация: ${page}`);
+    });
+});
+
+// Инициализация
 generateWeekCalendar();
+renderUserHabits();
+updateXPDisplay();
+checkSprintVisibility();
 
 // Предотвращаем масштабирование на iOS
 document.addEventListener('gesturestart', (e) => {
