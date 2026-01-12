@@ -4,6 +4,11 @@
     box-sizing: border-box;
 }
 
+:root {
+    --safe-area-top: env(safe-area-inset-top);
+    --safe-area-bottom: env(safe-area-inset-bottom);
+}
+
 body {
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: #2C3744;
@@ -17,7 +22,7 @@ body {
     max-width: 100vw;
     min-height: 100vh;
     background-color: #2C3744;
-    padding: 20px 16px 80px 16px;
+    padding: calc(20px + var(--safe-area-top)) 16px calc(80px + var(--safe-area-bottom)) 16px;
     position: relative;
 }
 
@@ -26,7 +31,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+    padding-top: var(--safe-area-top);
 }
 
 .header-title {
@@ -57,8 +63,8 @@ body {
 .week-calendar {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 32px;
+    gap: 4px;
+    margin-bottom: 16px;
 }
 
 .day-item {
@@ -66,46 +72,83 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 4px;
     flex: 1;
     min-width: 44px;
     min-height: 68px;
     cursor: pointer;
     transition: all 0.2s ease;
+    padding: 8px 4px;
+    border-radius: 8px;
 }
 
 .day-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    line-height: 17px;
+    line-height: 16px;
     color: #FFFFFF;
     text-transform: uppercase;
 }
 
 .day-number {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
-    line-height: 24px;
+    line-height: 22px;
+    color: #FFFFFF;
+}
+
+/* Today styling */
+.day-item.today {
+    background-color: #C5D375;
+}
+
+.day-item.today .day-label,
+.day-item.today .day-number {
+    color: #1A1A1A;
+    font-weight: 700;
+}
+
+/* Past days styling */
+.day-item.past .day-label,
+.day-item.past .day-number {
+    color: #E8E8E8;
+}
+
+/* Future days styling */
+.day-item.future .day-label,
+.day-item.future .day-number {
     color: #A7A7A7;
 }
 
-.day-item.active .day-label {
-    font-weight: 700;
-    color: #C5D375;
+/* Calendar Navigation */
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 8px;
 }
 
-.day-item.active .day-number {
+.calendar-nav-btn {
+    background-color: #3E4A5A;
+    border: none;
+    border-radius: 8px;
     width: 44px;
     height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: transparent;
-    border: 2px solid #C5D375;
-    border-radius: 50%;
-    color: #C5D375;
-    font-size: 20px;
-    font-weight: 600;
+    cursor: pointer;
+    color: #FFFFFF;
+    transition: background-color 0.2s ease;
+}
+
+.calendar-nav-btn:active {
+    background-color: #353F4D;
+}
+
+.calendar-nav-btn svg {
+    width: 24px;
+    height: 24px;
 }
 
 /* Add Habit Button */
@@ -123,7 +166,7 @@ body {
     font-size: 16px;
     font-weight: 500;
     color: #FFFFFF;
-    margin-bottom: 40px;
+    margin-bottom: 24px;
     transition: background-color 0.2s ease;
 }
 
@@ -137,17 +180,28 @@ body {
     line-height: 1;
 }
 
-/* Sprint Card */
+/* Sprint Card - moved to bottom */
 .sprint-card {
+    position: fixed;
+    bottom: calc(80px + var(--safe-area-bottom));
+    left: 0;
+    right: 0;
     display: flex;
-    align-items: flex-end;
-    gap: 16px;
-    margin-bottom: 40px;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 16px;
+    background-color: #2C3744;
+    z-index: 90;
+    transition: transform 0.3s ease;
+}
+
+.sprint-card.hidden {
+    transform: translateY(100%);
 }
 
 .sprint-character {
     width: 80px;
-    height: 96px;
+    height: auto;
     object-fit: contain;
     flex-shrink: 0;
 }
@@ -155,42 +209,58 @@ body {
 .sprint-bubble {
     flex: 1;
     background-color: #3E4A5A;
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 0;
     position: relative;
     overflow: hidden;
-}
-
-.sprint-bubble::before {
-    content: '';
-    position: absolute;
-    left: -8px;
-    bottom: 16px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 12px 12px 0;
-    border-color: transparent #3E4A5A transparent transparent;
+    display: flex;
+    flex-direction: column;
 }
 
 .bubble-header {
     background-color: #C5D375;
-    padding: 12px 16px;
+    padding: 8px 12px;
+    flex-shrink: 0;
 }
 
 .sprint-name {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    line-height: 19px;
+    line-height: 18px;
     color: #1A1A1A;
 }
 
 .sprint-text {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 18px;
     color: #FFFFFF;
-    padding: 12px 16px;
+    padding: 8px 12px;
+    flex: 1;
+}
+
+.sprint-close-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #FFFFFF;
+    font-size: 18px;
+    line-height: 1;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+}
+
+.sprint-close-btn:active {
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Bottom Navigation */
@@ -203,7 +273,7 @@ body {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 8px 16px 12px 16px;
+    padding: 8px 16px calc(12px + var(--safe-area-bottom)) 16px;
     border-top: 1px solid #3E4A5A;
     z-index: 100;
 }
@@ -251,15 +321,11 @@ body {
     }
     
     .week-calendar {
-        gap: 4px;
+        gap: 2px;
     }
     
     .day-item {
         min-width: 40px;
-    }
-    
-    .day-item.active .day-number {
-        width: 40px;
-        height: 40px;
+        padding: 6px 2px;
     }
 }
