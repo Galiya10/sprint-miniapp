@@ -33,11 +33,10 @@ try {
 
 // Получаем текущую дату
 const today = new Date();
-const currentDay = today.getDate();
 
 // Генерируем календарь на неделю
 function generateWeekCalendar() {
-    const weekCalendar = document.querySelector('.week-calendar');
+    const weekCalendar = document.getElementById('weekCalendar');
     const dayLabels = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
     
     // Находим начало недели (понедельник)
@@ -109,7 +108,7 @@ document.querySelector('.rewards-btn').addEventListener('click', () => {
 });
 
 // Обработчики для навигации
-document.querySelectorAll('.nav-item').forEach((navItem, index) => {
+document.querySelectorAll('.nav-item').forEach((navItem) => {
     navItem.addEventListener('click', () => {
         if (miniApp.hapticFeedback?.impactOccurred.isAvailable()) {
             miniApp.hapticFeedback.impactOccurred('light');
@@ -121,8 +120,8 @@ document.querySelectorAll('.nav-item').forEach((navItem, index) => {
         navItem.classList.add('active');
         
         // Здесь добавьте логику навигации
-        const labels = ['сегодня', 'дуэль', 'сад', 'история'];
-        console.log(`Навигация: ${labels[index]}`);
+        const page = navItem.getAttribute('data-page');
+        console.log(`Навигация: ${page}`);
     });
 });
 
