@@ -1,34 +1,11 @@
-import { init, miniApp, themeParams, viewport } from '@telegram-apps/sdk';
+// Инициализация Telegram Web App (используем старый API напрямую)
+const tg = window.Telegram?.WebApp;
 
-// Инициализация Telegram Mini App SDK
-try {
-    init();
-    
-    // Включаем полноэкранный режим
-    if (viewport.mount.isAvailable()) {
-        viewport.mount();
-        viewport.expand();
-    }
-    
-    // Применяем тему Telegram
-    if (themeParams.mount.isAvailable()) {
-        themeParams.mount();
-    }
-    
-    // Настраиваем Mini App
-    if (miniApp.mount.isAvailable()) {
-        miniApp.mount();
-        miniApp.setHeaderColor('#2C3744');
-        miniApp.setBackgroundColor('#2C3744');
-    }
-    
-    // Готовность приложения
-    if (miniApp.ready.isAvailable()) {
-        miniApp.ready();
-    }
-    
-} catch (error) {
-    console.error('Ошибка инициализации Telegram SDK:', error);
+if (tg) {
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor('#2C3744');
+    tg.setBackgroundColor('#2C3744');
 }
 
 // Получаем текущую дату
@@ -79,9 +56,9 @@ function generateWeekCalendar() {
             });
             dayItem.classList.add('active');
             
-            // Здесь можно добавить логику загрузки привычек для выбранного дня
-            if (miniApp.hapticFeedback?.impactOccurred.isAvailable()) {
-                miniApp.hapticFeedback.impactOccurred('light');
+            // Добавляем тактильную обратную связь
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
             }
         });
     }
@@ -89,8 +66,8 @@ function generateWeekCalendar() {
 
 // Обработчик для кнопки добавления привычки
 document.querySelector('.add-habit-btn').addEventListener('click', () => {
-    if (miniApp.hapticFeedback?.impactOccurred.isAvailable()) {
-        miniApp.hapticFeedback.impactOccurred('medium');
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('medium');
     }
     
     // Здесь добавьте логику открытия формы создания привычки
@@ -99,8 +76,8 @@ document.querySelector('.add-habit-btn').addEventListener('click', () => {
 
 // Обработчик для кнопки наград
 document.querySelector('.rewards-btn').addEventListener('click', () => {
-    if (miniApp.hapticFeedback?.impactOccurred.isAvailable()) {
-        miniApp.hapticFeedback.impactOccurred('light');
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
     }
     
     // Здесь добавьте логику открытия экрана наград
@@ -110,8 +87,8 @@ document.querySelector('.rewards-btn').addEventListener('click', () => {
 // Обработчики для навигации
 document.querySelectorAll('.nav-item').forEach((navItem) => {
     navItem.addEventListener('click', () => {
-        if (miniApp.hapticFeedback?.impactOccurred.isAvailable()) {
-            miniApp.hapticFeedback.impactOccurred('light');
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
         }
         
         document.querySelectorAll('.nav-item').forEach(item => {
