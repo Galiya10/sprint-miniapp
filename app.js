@@ -7,6 +7,15 @@ if (tg) {
     tg.setHeaderColor('#2C3744');
     tg.setBackgroundColor('#2C3744');
     tg.enableClosingConfirmation();
+    
+    // Устанавливаем кнопку "Назад" для страницы привычек
+    tg.BackButton.onClick(() => {
+        if (!document.getElementById('habitsPage').classList.contains('hidden')) {
+            document.getElementById('habitsPage').classList.add('hidden');
+            document.getElementById('mainPage').classList.remove('hidden');
+            tg.BackButton.hide();
+        }
+    });
 }
 
 // Хранилище данных
@@ -67,7 +76,7 @@ function checkSprintVisibility() {
     }
 }
 
-// Генерируем календарь по неделям
+// Генерируем календарь на неделю
 function generateWeekCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
     const dayLabels = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
@@ -75,96 +84,72 @@ function generateWeekCalendar() {
     // Очищаем календарь
     weekCalendar.innerHTML = '';
     
-    // Генерируем 3 недели: прошлая, текущая, следующая
-    const startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - 14); // 2 недели назад
-    const weekStart = getWeekStart(startDate);
+    // Находим начало текущей недели
+    const weekStart = getWeekStart(selectedDate);
     
-    // Создаем группы недель
-    for (let weekOffset = 0; weekOffset < 4; weekOffset++) {
-        const weekGroup = document.createElement('div');
-        weekGroup.className = 'week-group';
+    // Создаем 7 дней недели
+    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + dayOffset);
         
-        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-            const date = new Date(weekStart);
-            date.setDate(weekStart.getDate() + (weekOffset * 7) + dayOffset);
-            
-            const dayItem = document.createElement('div');
-            dayItem.className = 'day-item';
-            dayItem.dataset.date = formatDate(date);
-            
-            // Применяем стили в зависимости от даты
-            if (isSameDate(date, selectedDate)) {
-                dayItem.classList.add('selected');
-            } else if (isSameDate(date, today)) {
-                dayItem.classList.add('today');
-            } else if (isPast(date)) {
-                dayItem.classList.add('past');
-            } else if (isFuture(date)) {
-                dayItem.classList.add('future');
-            }
-            
-            const dayLabel = document.createElement('span');
-            dayLabel.className = 'day-label';
-            dayLabel.textContent = dayLabels[(dayOffset + 1) % 7];
-            
-            const dayNumber = document.createElement('span');
-            dayNumber.className = 'day-number';
-            dayNumber.textContent = date.getDate();
-            
-            dayItem.appendChild(dayLabel);
-            dayItem.appendChild(dayNumber);
-            weekGroup.appendChild(dayItem);
-            
-            // Добавляем обработчик клика
-            dayItem.addEventListener('click', () => {
-                // Снимаем выделение со всех дней
-                document.querySelectorAll('.day-item').forEach(item => {
-                    item.classList.remove('selected');
-                    const itemDate = new Date(item.dataset.date);
-                    
-                    // Восстанавливаем правильные классы
-                    if (isSameDate(itemDate, today)) {
-                        item.classList.add('today');
-                    } else if (isPast(itemDate)) {
-                        item.classList.add('past');
-                    } else if (isFuture(itemDate)) {
-                        item.classList.add('future');
-                    }
-                });
+        const dayItem = document.createElement('div');
+        dayItem.className = 'day-item';
+        dayItem.dataset.date = formatDate(date);
+        
+        // Применяем стили в зависимости от даты
+        if (isSameDate(date, selectedDate)) {
+            dayItem.classList.add('selected');
+        } else if (isSameDate(date, today)) {
+            dayItem.classList.add('today');
+        } else if (isPast(date)) {
+            dayItem.classList.add('past');
+        } else if (isFuture(date)) {
+            dayItem.classList.add('future');
+        }
+        
+        const dayLabel = document.createElement('span');
+        dayLabel.className = 'day-label';
+        dayLabel.textContent = dayLabels[(dayOffset + 1) % 7];
+        
+        const dayNumber = document.createElement('span');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = date.getDate();
+        
+        dayItem.appendChild(dayLabel);
+        dayItem.appendChild(dayNumber);
+        weekCalendar.appendChild(dayItem);
+        
+        // Добавляем обработчик клика
+        dayItem.addEventListener('click', () => {
+            // Снимаем выделение со всех дней
+            document.querySelectorAll('.day-item').forEach(item => {
+                item.classList.remove('selected');
+                const itemDate = new Date(item.dataset.date);
                 
-                // Выделяем выбранный день
-                dayItem.classList.add('selected');
-                dayItem.classList.remove('today', 'past', 'future');
-                
-                selectedDate = new Date(date);
-                
-                if (tg?.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('light');
+                // Восстанавливаем правильные классы
+                if (isSameDate(itemDate, today)) {
+                    item.classList.add('today');
+                } else if (isPast(itemDate)) {
+                    item.classList.add('past');
+                } else if (isFuture(itemDate)) {
+                    item.classList.add('future');
                 }
-                
-                // Обновляем отображение привычек для выбранной даты
-                renderUserHabits();
             });
-        }
-        
-        weekCalendar.appendChild(weekGroup);
-    }
-    
-    // Скроллим к текущей неделе
-    setTimeout(() => {
-        const todayElement = document.querySelector('.day-item.today, .day-item.selected');
-        if (todayElement) {
-            const weekGroup = todayElement.closest('.week-group');
-            if (weekGroup) {
-                weekGroup.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'nearest', 
-                    inline: 'center' 
-                });
+            
+            // Выделяем выбранный день
+            dayItem.classList.add('selected');
+            dayItem.classList.remove('today', 'past', 'future');
+            
+            selectedDate = new Date(date);
+            
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
             }
-        }
-    }, 100);
+            
+            // Обновляем отображение привычек для выбранной даты
+            renderUserHabits();
+        });
+    }
 }
 
 // Отображение привычек пользователя
@@ -188,16 +173,45 @@ function renderUserHabits() {
                     <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
                 </div>
             </div>
-            <button class="user-habit-check ${isCompleted ? 'completed' : ''}" data-index="${index}">
-                ${isCompleted ? '✓' : ''}
-            </button>
+            <div class="user-habit-actions">
+                <button class="user-habit-delete" data-index="${index}">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7.08331 4.14167L7.26665 3.05001C7.39998 2.25834 7.49998 1.66667 8.90831 1.66667H11.0916C12.5 1.66667 12.6083 2.29167 12.7333 3.05834L12.9166 4.14167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.7084 7.61667L15.1667 16.0083C15.075 17.3167 15 18.3333 12.675 18.3333H7.32502C5.00002 18.3333 4.92502 17.3167 4.83335 16.0083L4.29169 7.61667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="user-habit-check ${isCompleted ? 'completed' : ''}" data-index="${index}">
+                    ${isCompleted ? '✓' : ''}
+                </button>
+            </div>
         `;
         
         const checkBtn = habitItem.querySelector('.user-habit-check');
+        const deleteBtn = habitItem.querySelector('.user-habit-delete');
+        
         checkBtn.addEventListener('click', () => toggleHabitCompletion(habit, selectedDateStr, checkBtn));
+        deleteBtn.addEventListener('click', () => deleteHabit(index, habitItem));
         
         habitsList.appendChild(habitItem);
     });
+}
+
+// Удаление привычки
+function deleteHabit(index, habitElement) {
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred('warning');
+    }
+    
+    // Анимация удаления
+    habitElement.classList.add('deleting');
+    
+    setTimeout(() => {
+        userHabits.splice(index, 1);
+        localStorage.setItem('userHabits', JSON.stringify(userHabits));
+        renderUserHabits();
+        checkSprintVisibility();
+    }, 300);
 }
 
 // Переключение выполнения привычки
@@ -254,6 +268,11 @@ document.getElementById('addHabitBtn').addEventListener('click', () => {
     // Показываем страницу с привычками
     document.getElementById('mainPage').classList.add('hidden');
     document.getElementById('habitsPage').classList.remove('hidden');
+    
+    // Показываем кнопку "Назад" в Telegram
+    if (tg?.BackButton) {
+        tg.BackButton.show();
+    }
 });
 
 // Обработчик для закрытия карточки Спринта
@@ -280,11 +299,58 @@ document.querySelectorAll('.habit-add-btn').forEach(btn => {
             // Возвращаемся на главную страницу
             document.getElementById('habitsPage').classList.add('hidden');
             document.getElementById('mainPage').classList.remove('hidden');
+            
+            if (tg?.BackButton) {
+                tg.BackButton.hide();
+            }
         } else {
             if (tg?.HapticFeedback) {
                 tg.HapticFeedback.notificationOccurred('error');
             }
-            alert('Эта привычка уже добавлена!');
+            if (tg?.showAlert) {
+                tg.showAlert('Эта привычка уже добавлена!');
+            }
+        }
+    });
+});
+
+// Обработчики для кнопок "добавить свою привычку"
+document.querySelectorAll('.add-category-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const category = btn.dataset.category;
+        const maxXP = parseInt(btn.dataset.maxXp);
+        
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        // Запрашиваем название привычки у пользователя
+        const habitName = prompt(`Введите название привычки для категории "${category}":`);
+        
+        if (habitName && habitName.trim()) {
+            const customHabit = {
+                name: habitName.trim(),
+                xp: maxXP,
+                category: category
+            };
+            
+            // Проверяем, не добавлена ли уже эта привычка
+            const exists = userHabits.some(h => h.name === customHabit.name);
+            if (!exists) {
+                addHabit(customHabit);
+                
+                // Возвращаемся на главную страницу
+                document.getElementById('habitsPage').classList.add('hidden');
+                document.getElementById('mainPage').classList.remove('hidden');
+                
+                if (tg?.BackButton) {
+                    tg.BackButton.hide();
+                }
+            } else {
+                if (tg?.showAlert) {
+                    tg.showAlert('Привычка с таким названием уже существует!');
+                }
+            }
         }
     });
 });
@@ -302,12 +368,6 @@ document.querySelectorAll('#mainPage .nav-item').forEach((navItem) => {
         navItem.classList.add('active');
         
         const page = navItem.getAttribute('data-page');
-        
-        // Если нажали на "сегодня" из другой вкладки
-        if (page === 'today') {
-            // Уже на главной странице
-        }
-        
         console.log(`Навигация: ${page}`);
     });
 });
@@ -325,6 +385,10 @@ document.querySelectorAll('#habitsPage .nav-item').forEach((navItem) => {
         if (page === 'today') {
             document.getElementById('habitsPage').classList.add('hidden');
             document.getElementById('mainPage').classList.remove('hidden');
+            
+            if (tg?.BackButton) {
+                tg.BackButton.hide();
+            }
             
             // Активируем правильный пункт навигации на главной странице
             document.querySelectorAll('#mainPage .nav-item').forEach(item => {
