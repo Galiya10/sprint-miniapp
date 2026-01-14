@@ -202,49 +202,72 @@ function deleteHabitFromModal() {
     }
 }
 
-// Отображение привычек пользователя
+// Отображение привычек пользователя с группировкой по категориям
 function renderUserHabits() {
     const habitsList = document.getElementById('habitsList');
     habitsList.innerHTML = '';
     
     const selectedDateStr = formatDate(selectedDate);
     
+    // Группируем привычки по категориям
+    const habitsByCategory = {};
     userHabits.forEach((habit, index) => {
-        const habitItem = document.createElement('div');
-        habitItem.className = 'user-habit-item';
+        const category = habit.category || 'Другое';
+        if (!habitsByCategory[category]) {
+            habitsByCategory[category] = [];
+        }
+        habitsByCategory[category].push({ habit, index });
+    });
+    
+    // Отображаем привычки по категориям
+    Object.keys(habitsByCategory).forEach(category => {
+        const categoryGroup = document.createElement('div');
+        categoryGroup.className = 'habit-category-group';
         
-        const isCompleted = habitCompletions[selectedDateStr]?.[habit.name] || false;
+        const categoryTitle = document.createElement('h3');
+        categoryTitle.className = 'habit-category-title';
+        categoryTitle.textContent = category;
+        categoryGroup.appendChild(categoryTitle);
         
-        habitItem.innerHTML = `
-            <div class="user-habit-info">
-                <span class="user-habit-name">${habit.name}</span>
-                <div class="user-habit-xp">
-                    <span>${habit.xp}</span>
-                    <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
+        habitsByCategory[category].forEach(({ habit, index }) => {
+            const isCompleted = habitCompletions[selectedDateStr]?.[habit.name] || false;
+            
+            const habitItem = document.createElement('div');
+            habitItem.className = 'user-habit-item';
+            
+            habitItem.innerHTML = `
+                <div class="user-habit-info">
+                    <span class="user-habit-name">${habit.name}</span>
+                    <div class="user-habit-xp">
+                        <span>${habit.xp}</span>
+                        <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
+                    </div>
                 </div>
-            </div>
-            <button class="user-habit-check ${isCompleted ? 'completed' : ''}" data-index="${index}">
-                ${isCompleted ? '✓' : ''}
-            </button>
-        `;
-        
-        const checkBtn = habitItem.querySelector('.user-habit-check');
-        
-        // Клик по привычке открывает статистику
-        habitItem.addEventListener('click', (e) => {
-            // Если кликнули не по кнопке чекбокса
-            if (!e.target.closest('.user-habit-check')) {
-                showHabitStats(habit, index);
-            }
+                <button class="user-habit-check ${isCompleted ? 'completed' : ''}" data-index="${index}">
+                    ${isCompleted ? '✓' : ''}
+                </button>
+            `;
+            
+            const checkBtn = habitItem.querySelector('.user-habit-check');
+            
+            // Клик по привычке открывает статистику
+            habitItem.addEventListener('click', (e) => {
+                // Если кликнули не по кнопке чекбокса
+                if (!e.target.closest('.user-habit-check')) {
+                    showHabitStats(habit, index);
+                }
+            });
+            
+            // Клик по чекбоксу отмечает выполнение
+            checkBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleHabitCompletion(habit, selectedDateStr, checkBtn);
+            });
+            
+            categoryGroup.appendChild(habitItem);
         });
         
-        // Клик по чекбоксу отмечает выполнение
-        checkBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleHabitCompletion(habit, selectedDateStr, checkBtn);
-        });
-        
-        habitsList.appendChild(habitItem);
+        habitsList.appendChild(categoryGroup);
     });
 }
 
