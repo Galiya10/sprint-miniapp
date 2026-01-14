@@ -22,6 +22,7 @@ if (tg) {
 let userHabits = JSON.parse(localStorage.getItem('userHabits')) || [];
 let userXP = parseInt(localStorage.getItem('userXP')) || 0;
 let habitCompletions = JSON.parse(localStorage.getItem('habitCompletions')) || {};
+let selectedHabitIndex = null;
 
 // Получаем текущую дату
 const today = new Date();
@@ -152,6 +153,55 @@ function generateWeekCalendar() {
     }
 }
 
+// Подсчет общего количества выполнений привычки
+function getTotalCompletions(habitName) {
+    let count = 0;
+    for (const date in habitCompletions) {
+        if (habitCompletions[date][habitName]) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Показать модальное окно со статистикой привычки
+function showHabitStats(habit, index) {
+    selectedHabitIndex = index;
+    const modal = document.getElementById('habitStatsModal');
+    
+    document.getElementById('modalHabitName').textContent = habit.name;
+    document.getElementById('totalCompletions').textContent = getTotalCompletions(habit.name);
+    document.getElementById('habitXP').textContent = habit.xp;
+    
+    modal.classList.remove('hidden');
+    
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+    }
+}
+
+// Закрыть модальное окно
+function closeModal() {
+    document.getElementById('habitStatsModal').classList.add('hidden');
+    selectedHabitIndex = null;
+}
+
+// Удаление привычки из модального окна
+function deleteHabitFromModal() {
+    if (selectedHabitIndex !== null) {
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred('warning');
+        }
+        
+        userHabits.splice(selectedHabitIndex, 1);
+        localStorage.setItem('userHabits', JSON.stringify(userHabits));
+        
+        closeModal();
+        renderUserHabits();
+        checkSprintVisibility();
+    }
+}
+
 // Отображение привычек пользователя
 function renderUserHabits() {
     const habitsList = document.getElementById('habitsList');
@@ -173,45 +223,29 @@ function renderUserHabits() {
                     <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
                 </div>
             </div>
-            <div class="user-habit-actions">
-                <button class="user-habit-delete" data-index="${index}">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M7.08331 4.14167L7.26665 3.05001C7.39998 2.25834 7.49998 1.66667 8.90831 1.66667H11.0916C12.5 1.66667 12.6083 2.29167 12.7333 3.05834L12.9166 4.14167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M15.7084 7.61667L15.1667 16.0083C15.075 17.3167 15 18.3333 12.675 18.3333H7.32502C5.00002 18.3333 4.92502 17.3167 4.83335 16.0083L4.29169 7.61667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-                <button class="user-habit-check ${isCompleted ? 'completed' : ''}" data-index="${index}">
-                    ${isCompleted ? '✓' : ''}
-                </button>
-            </div>
+            <button class="user-habit-check ${isCompleted ? 'completed' : ''}" data-index="${index}">
+                ${isCompleted ? '✓' : ''}
+            </button>
         `;
         
         const checkBtn = habitItem.querySelector('.user-habit-check');
-        const deleteBtn = habitItem.querySelector('.user-habit-delete');
         
-        checkBtn.addEventListener('click', () => toggleHabitCompletion(habit, selectedDateStr, checkBtn));
-        deleteBtn.addEventListener('click', () => deleteHabit(index, habitItem));
+        // Клик по привычке открывает статистику
+        habitItem.addEventListener('click', (e) => {
+            // Если кликнули не по кнопке чекбокса
+            if (!e.target.closest('.user-habit-check')) {
+                showHabitStats(habit, index);
+            }
+        });
+        
+        // Клик по чекбоксу отмечает выполнение
+        checkBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleHabitCompletion(habit, selectedDateStr, checkBtn);
+        });
         
         habitsList.appendChild(habitItem);
     });
-}
-
-// Удаление привычки
-function deleteHabit(index, habitElement) {
-    if (tg?.HapticFeedback) {
-        tg.HapticFeedback.notificationOccurred('warning');
-    }
-    
-    // Анимация удаления
-    habitElement.classList.add('deleting');
-    
-    setTimeout(() => {
-        userHabits.splice(index, 1);
-        localStorage.setItem('userHabits', JSON.stringify(userHabits));
-        renderUserHabits();
-        checkSprintVisibility();
-    }, 300);
 }
 
 // Переключение выполнения привычки
@@ -285,6 +319,27 @@ document.getElementById('closeSprintCard').addEventListener('click', () => {
     }
 });
 
+// Обработчики для модального окна
+document.getElementById('closeModal').addEventListener('click', closeModal);
+document.getElementById('deleteHabitBtn').addEventListener('click', deleteHabitFromModal);
+
+document.getElementById('editHabitBtn').addEventListener('click', () => {
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+    }
+    // Здесь можно добавить функционал редактирования
+    if (tg?.showAlert) {
+        tg.showAlert('Функция редактирования будет добавлена в следующей версии!');
+    }
+});
+
+// Закрытие модального окна по клику на overlay
+document.getElementById('habitStatsModal').addEventListener('click', (e) => {
+    if (e.target.id === 'habitStatsModal') {
+        closeModal();
+    }
+});
+
 // Обработчики кнопок добавления привычек
 document.querySelectorAll('.habit-add-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -353,6 +408,54 @@ document.querySelectorAll('.add-category-btn').forEach(btn => {
             }
         }
     });
+});
+
+// Обработчик для кнопки "Своя категория"
+document.getElementById('addOwnCategory').addEventListener('click', () => {
+    if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+    }
+    
+    const categoryName = prompt('Введите название новой категории:');
+    
+    if (categoryName && categoryName.trim()) {
+        const habitName = prompt(`Введите название привычки для категории "${categoryName.trim()}":`);
+        
+        if (habitName && habitName.trim()) {
+            const xpAmount = prompt('Введите количество XP (от 1 до 10):');
+            const xp = parseInt(xpAmount);
+            
+            if (xp && xp >= 1 && xp <= 10) {
+                const customHabit = {
+                    name: habitName.trim(),
+                    xp: xp,
+                    category: categoryName.trim()
+                };
+                
+                // Проверяем, не добавлена ли уже эта привычка
+                const exists = userHabits.some(h => h.name === customHabit.name);
+                if (!exists) {
+                    addHabit(customHabit);
+                    
+                    // Возвращаемся на главную страницу
+                    document.getElementById('habitsPage').classList.add('hidden');
+                    document.getElementById('mainPage').classList.remove('hidden');
+                    
+                    if (tg?.BackButton) {
+                        tg.BackButton.hide();
+                    }
+                } else {
+                    if (tg?.showAlert) {
+                        tg.showAlert('Привычка с таким названием уже существует!');
+                    }
+                }
+            } else {
+                if (tg?.showAlert) {
+                    tg.showAlert('Неверное количество XP! Введите число от 1 до 10.');
+                }
+            }
+        }
+    }
 });
 
 // Обработчики для навигации на главной странице
