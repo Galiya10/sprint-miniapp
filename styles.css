@@ -16,18 +16,18 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Support for older iOS versions */
     padding-top: constant(safe-area-inset-top);
     padding-top: env(safe-area-inset-top);
-    padding-bottom: constant(safe-area-inset-bottom);
-    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .app-container {
     max-width: 100vw;
     min-height: 100vh;
     background-color: #2C3744;
-    padding: 20px 16px calc(80px + var(--safe-area-bottom)) 16px;
-    padding-top: calc(20px + var(--safe-area-top));
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: calc(80px + max(16px, env(safe-area-inset-bottom)));
     position: relative;
 }
 
@@ -71,7 +71,7 @@ body {
     color: #FFFFFF;
 }
 
-/* Week Calendar - Scrollable by weeks */
+/* Week Calendar */
 .calendar-wrapper {
     overflow-x: auto;
     overflow-y: hidden;
@@ -171,18 +171,12 @@ body {
     background-color: #3E4A5A;
     border-radius: 12px;
     margin-bottom: 8px;
-    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-.user-habit-item.deleting {
-    animation: slideOut 0.3s ease-out forwards;
-}
-
-@keyframes slideOut {
-    to {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
+.user-habit-item:active {
+    background-color: #353F4D;
 }
 
 .user-habit-info {
@@ -207,12 +201,6 @@ body {
     color: #A7A7A7;
 }
 
-.user-habit-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 .user-habit-check {
     background: none;
     border: 2px solid #C5D375;
@@ -231,23 +219,6 @@ body {
 .user-habit-check.completed {
     background-color: #C5D375;
     color: #1A1A1A;
-}
-
-.user-habit-delete {
-    background: none;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    color: #FF6B6B;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.2s ease;
-    flex-shrink: 0;
-}
-
-.user-habit-delete:active {
-    opacity: 0.7;
 }
 
 /* Add Habit Button */
@@ -280,37 +251,38 @@ body {
     line-height: 1;
 }
 
-/* Sprint Card - moved to bottom */
+/* Sprint Card - новый дизайн */
 .sprint-card {
     position: fixed;
-    bottom: calc(80px + var(--safe-area-bottom));
+    bottom: calc(72px + max(0px, env(safe-area-inset-bottom)));
     left: 0;
     right: 0;
     display: flex;
-    align-items: stretch;
-    gap: 12px;
-    padding: 16px;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 8px 16px;
     background-color: #2C3744;
     z-index: 90;
     transition: transform 0.3s ease;
 }
 
 .sprint-card.hidden {
-    transform: translateY(calc(100% + 80px));
+    transform: translateY(200%);
 }
 
 .sprint-character {
-    width: 100px;
+    width: 140px;
     height: auto;
     object-fit: contain;
-    flex-shrink: 0;
-    align-self: stretch;
+    margin-bottom: -20px;
+    position: relative;
+    z-index: 2;
 }
 
 .sprint-bubble {
-    flex: 1;
-    background-color: #3E4A5A;
-    border-radius: 12px;
+    width: 100%;
+    background-color: #353F49;
+    border-radius: 16px;
     padding: 0;
     position: relative;
     overflow: hidden;
@@ -319,51 +291,220 @@ body {
 }
 
 .bubble-header {
+    display: inline-block;
     background-color: #C5D375;
-    padding: 10px 14px;
-    flex-shrink: 0;
+    padding: 6px 16px;
+    border-radius: 12px;
+    margin: 12px 0 0 12px;
+    width: fit-content;
 }
 
 .sprint-name {
-    font-size: 15px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
     font-weight: 700;
     line-height: 20px;
     color: #1A1A1A;
 }
 
 .sprint-text {
+    font-family: 'Nunito', sans-serif;
     font-size: 14px;
     font-weight: 400;
     line-height: 19px;
     color: #FFFFFF;
-    padding: 10px 14px;
-    flex: 1;
-    display: flex;
-    align-items: center;
+    padding: 12px 16px 16px 16px;
 }
 
 .sprint-close-btn {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    background: rgba(0, 0, 0, 0.4);
-    border: none;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: 2px solid #C5D375;
     border-radius: 50%;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #FFFFFF;
+    color: #C5D375;
     font-size: 20px;
     line-height: 1;
     z-index: 10;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .sprint-close-btn:active {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(197, 211, 117, 0.2);
+}
+
+/* Modal for Habit Stats */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    padding: 16px;
+}
+
+.modal-content {
+    background-color: #3E4A5A;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFFFFF;
+    flex: 1;
+    margin-right: 12px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    font-size: 28px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.modal-close:active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.stats-section {
+    margin-bottom: 24px;
+}
+
+.stats-section h3 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #C5D375;
+    margin-bottom: 16px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #A7A7A7;
+}
+
+.stat-value {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.stat-xp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.xp-flower-small {
+    width: 18px;
+    height: 18px;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-edit,
+.btn-delete {
+    width: 100%;
+    min-height: 48px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-edit {
+    background-color: #C5D375;
+    color: #1A1A1A;
+}
+
+.btn-edit:active {
+    background-color: #B0C060;
+}
+
+.btn-delete {
+    background-color: transparent;
+    color: #FF6B6B;
+    border: 2px solid #FF6B6B;
+}
+
+.btn-delete:active {
+    background-color: rgba(255, 107, 107, 0.1);
 }
 
 /* Bottom Navigation */
@@ -376,7 +517,8 @@ body {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 8px 16px calc(12px + var(--safe-area-bottom)) 16px;
+    padding: 8px 16px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
     border-top: 1px solid #3E4A5A;
     z-index: 100;
 }
@@ -427,8 +569,8 @@ body {
     background-color: #2C3744;
     z-index: 200;
     overflow-y: auto;
-    padding-top: calc(20px + var(--safe-area-top));
-    padding-bottom: calc(80px + var(--safe-area-bottom));
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: calc(72px + max(0px, env(safe-area-inset-bottom)));
 }
 
 .habits-content {
