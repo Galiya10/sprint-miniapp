@@ -40,11 +40,11 @@
             <span>добавить новую привычку</span>
         </button>
 
-        <!-- Sprint Character Card (moved to bottom) -->
+        <!-- Sprint Character Card (новый дизайн) -->
         <div class="sprint-card" id="sprintCard">
-            <button class="sprint-close-btn" id="closeSprintCard">×</button>
             <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D0%BB%D0%B5%D0%BD%D0%B8%D0%B2%D0%B5%D1%86.png" alt="Спринт" class="sprint-character">
             <div class="sprint-bubble">
+                <button class="sprint-close-btn" id="closeSprintCard">×</button>
                 <div class="bubble-header">
                     <span class="sprint-name">Спринт</span>
                 </div>
@@ -89,6 +89,36 @@
                 <span class="nav-label">история</span>
             </button>
         </nav>
+    </div>
+
+    <!-- Habit Stats Modal -->
+    <div class="modal-overlay hidden" id="habitStatsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalHabitName">Название привычки</h2>
+                <button class="modal-close" id="closeModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-section">
+                    <h3>Статистика</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Всего выполнений:</span>
+                        <span class="stat-value" id="totalCompletions">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">XP за привычку:</span>
+                        <div class="stat-xp">
+                            <span id="habitXP">0</span>
+                            <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower-small">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-edit" id="editHabitBtn">Редактировать</button>
+                    <button class="btn-delete" id="deleteHabitBtn">Удалить привычку</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Habits Selection Page -->
@@ -147,8 +177,10 @@
                 </div>
 
                 <button class="add-category-btn" data-category="Здоровье" data-max-xp="2">
-                    <span class="plus-icon">+</span>
-                    <span>добавить свою привычку</span>
+                    <div>
+                        <span class="plus-icon">+</span>
+                        <span>добавить свою привычку</span>
+                    </div>
                     <div class="habit-xp">
                         <span>2</span>
                         <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
@@ -197,6 +229,7 @@
                         <span class="habit-name">Тренировка</span>
                         <div class="habit-xp">
                             <span>10</span>
+                            <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
                         </div>
                     </div>
                     <button class="habit-add-btn">
@@ -224,8 +257,10 @@
                 </div>
 
                 <button class="add-category-btn" data-category="Спорт" data-max-xp="5">
-                    <span class="plus-icon">+</span>
-                    <span>добавить свою привычку</span>
+                    <div>
+                        <span class="plus-icon">+</span>
+                        <span>добавить свою привычку</span>
+                    </div>
                     <div class="habit-xp">
                         <span>5</span>
                         <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
@@ -234,13 +269,15 @@
             </div>
 
             <!-- Своя категория -->
-            <button class="add-category-btn-large">
+            <button class="add-category-btn-large" id="addOwnCategory">
                 <span class="plus-icon">+</span>
                 <span>Своя категория</span>
             </button>
-            <button class="add-category-btn" data-category="Другое" data-max-xp="2">
-                <span class="plus-icon">+</span>
-                <span>добавить свою привычку</span>
+            <button class="add-category-btn add-custom-habit-btn" data-category="Другое" data-max-xp="2">
+                <div>
+                    <span class="plus-icon">+</span>
+                    <span>добавить свою привычку</span>
+                </div>
                 <div class="habit-xp">
                     <span>2</span>
                     <img src="https://raw.githubusercontent.com/Galiya10/sprint-miniapp/5667a2728ab6c2289516169acbe3e71ce53b602e/images/%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%BA_xp.png" alt="XP" class="xp-flower">
