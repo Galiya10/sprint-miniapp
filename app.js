@@ -31,6 +31,9 @@ today.setHours(0, 0, 0, 0);
 // Выбранная дата
 let selectedDate = new Date(today);
 
+// Текущая неделя для отображения
+let currentWeekStart = getWeekStart(selectedDate);
+
 // Функция для получения начала недели (понедельник)
 function getWeekStart(date) {
     const d = new Date(date);
@@ -77,7 +80,7 @@ function checkSprintVisibility() {
     }
 }
 
-// Генерируем календарь на неделю
+// Генерируем календарь с возможностью скролла по неделям
 function generateWeekCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
     const dayLabels = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
@@ -85,73 +88,124 @@ function generateWeekCalendar() {
     // Очищаем календарь
     weekCalendar.innerHTML = '';
     
-    // Находим начало текущей недели
-    const weekStart = getWeekStart(selectedDate);
+    // Генерируем недели: 2 недели назад, текущая неделя, 2 недели вперед (всего 5 недель)
+    const weeksToShow = 5;
+    const weekOffset = -2; // начинаем с 2 недель назад
     
-    // Создаем 7 дней недели
-    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-        const date = new Date(weekStart);
-        date.setDate(weekStart.getDate() + dayOffset);
+    for (let weekNum = 0; weekNum < weeksToShow; weekNum++) {
+        const weekStartDate = new Date(currentWeekStart);
+        weekStartDate.setDate(currentWeekStart.getDate() + (weekOffset + weekNum) * 7);
         
-        const dayItem = document.createElement('div');
-        dayItem.className = 'day-item';
-        dayItem.dataset.date = formatDate(date);
-        
-        // Применяем стили в зависимости от даты
-        if (isSameDate(date, selectedDate)) {
-            dayItem.classList.add('selected');
-        } else if (isSameDate(date, today)) {
-            dayItem.classList.add('today');
-        } else if (isPast(date)) {
-            dayItem.classList.add('past');
-        } else if (isFuture(date)) {
-            dayItem.classList.add('future');
-        }
-        
-        const dayLabel = document.createElement('span');
-        dayLabel.className = 'day-label';
-        dayLabel.textContent = dayLabels[(dayOffset + 1) % 7];
-        
-        const dayNumber = document.createElement('span');
-        dayNumber.className = 'day-number';
-        dayNumber.textContent = date.getDate();
-        
-        dayItem.appendChild(dayLabel);
-        dayItem.appendChild(dayNumber);
-        weekCalendar.appendChild(dayItem);
-        
-        // Добавляем обработчик клика
-        dayItem.addEventListener('click', () => {
-            // Снимаем выделение со всех дней
-            document.querySelectorAll('.day-item').forEach(item => {
-                item.classList.remove('selected');
-                const itemDate = new Date(item.dataset.date);
-                
-                // Восстанавливаем правильные классы
-                if (isSameDate(itemDate, today)) {
-                    item.classList.add('today');
-                } else if (isPast(itemDate)) {
-                    item.classList.add('past');
-                } else if (isFuture(itemDate)) {
-                    item.classList.add('future');
-                }
-            });
+        // Создаем 7 дней для каждой недели
+        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+            const date = new Date(weekStartDate);
+            date.setDate(weekStartDate.getDate() + dayOffset);
             
-            // Выделяем выбранный день
-            dayItem.classList.add('selected');
-            dayItem.classList.remove('today', 'past', 'future');
+            const dayItem = document.createElement('div');
+            dayItem.className = 'day-item';
+            dayItem.dataset.date = formatDate(date);
             
-            selectedDate = new Date(date);
-            
-            if (tg?.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
+            // Применяем стили в зависимости от даты
+            if (isSameDate(date, selectedDate)) {
+                dayItem.classList.add('selected');
+            } else if (isSameDate(date, today)) {
+                dayItem.classList.add('today');
+            } else if (isPast(date)) {
+                dayItem.classList.add('past');
+            } else if (isFuture(date)) {
+                dayItem.classList.add('future');
             }
             
-            // Обновляем отображение привычек для выбранной даты
-            renderUserHabits();
-        });
+            const dayLabel = document.createElement('span');
+            dayLabel.className = 'day-label';
+            dayLabel.textContent = dayLabels[(dayOffset + 1) % 7];
+            
+            const dayNumber = document.createElement('span');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            
+            dayItem.appendChild(dayLabel);
+            dayItem.appendChild(dayNumber);
+            weekCalendar.appendChild(dayItem);
+            
+            // Добавляем обработчик клика
+            dayItem.addEventListener('click', () => {
+                // Снимаем выделение со всех дней
+                document.querySelectorAll('.day-item').forEach(item => {
+                    item.classList.remove('selected');
+                    const itemDate = new Date(item.dataset.date);
+                    
+                    // Восстанавливаем правильные классы
+                    if (isSameDate(itemDate, today)) {
+                        item.classList.add('today');
+                    } else if (isPast(itemDate)) {
+                        item.classList.add('past');
+                    } else if (isFuture(itemDate)) {
+                        item.classList.add('future');
+                    }
+                });
+                
+                // Выделяем выбранный день
+                dayItem.classList.add('selected');
+                dayItem.classList.remove('today', 'past', 'future');
+                
+                selectedDate = new Date(date);
+                
+                if (tg?.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('light');
+                }
+                
+                // Обновляем отображение привычек для выбранной даты
+                renderUserHabits();
+            });
+        }
+    }
+    
+    // Прокручиваем к текущей неделе
+    scrollToCurrentWeek();
+}
+
+// Прокрутка к текущей неделе
+function scrollToCurrentWeek() {
+    const calendarWrapper = document.getElementById('calendarWrapper');
+    const dayItem = calendarWrapper.querySelector(`.day-item[data-date="${formatDate(selectedDate)}"]`);
+    
+    if (dayItem) {
+        const itemLeft = dayItem.offsetLeft;
+        const itemWidth = dayItem.offsetWidth;
+        const wrapperWidth = calendarWrapper.offsetWidth;
+        
+        // Прокручиваем так, чтобы выбранный день был по центру
+        calendarWrapper.scrollLeft = itemLeft - (wrapperWidth / 2) + (itemWidth / 2);
     }
 }
+
+// Обработка скролла календаря для динамической подгрузки недель
+let isScrolling;
+const calendarWrapper = document.getElementById('calendarWrapper');
+
+calendarWrapper.addEventListener('scroll', () => {
+    window.clearTimeout(isScrolling);
+    
+    isScrolling = setTimeout(() => {
+        const scrollLeft = calendarWrapper.scrollLeft;
+        const scrollWidth = calendarWrapper.scrollWidth;
+        const clientWidth = calendarWrapper.clientWidth;
+        
+        // Если прокрутили близко к началу - загружаем предыдущие недели
+        if (scrollLeft < 200) {
+            const oldWeekStart = new Date(currentWeekStart);
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            generateWeekCalendar();
+        }
+        
+        // Если прокрутили близко к концу - загружаем следующие недели
+        if (scrollLeft + clientWidth > scrollWidth - 200) {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            generateWeekCalendar();
+        }
+    }, 100);
+});
 
 // Подсчет общего количества выполнений привычки
 function getTotalCompletions(habitName) {
