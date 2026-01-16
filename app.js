@@ -80,7 +80,7 @@ function checkSprintVisibility() {
     }
 }
 
-// Генерируем календарь с возможностью плавного скролла по неделям
+// Генерируем календарь с возможностью скролла по неделям
 function generateWeekCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
     const dayLabels = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
@@ -88,9 +88,9 @@ function generateWeekCalendar() {
     // Очищаем календарь
     weekCalendar.innerHTML = '';
     
-    // Генерируем недели: 4 недели назад, текущая неделя, 4 недели вперед (всего 9 недель)
-    const weeksToShow = 9;
-    const weekOffset = -4; // начинаем с 4 недель назад
+    // Генерируем недели: 2 недели назад, текущая неделя, 2 недели вперед (всего 5 недель)
+    const weeksToShow = 5;
+    const weekOffset = -2; // начинаем с 2 недель назад
     
     for (let weekNum = 0; weekNum < weeksToShow; weekNum++) {
         const weekStartDate = new Date(currentWeekStart);
@@ -161,13 +161,11 @@ function generateWeekCalendar() {
         }
     }
     
-    // Прокручиваем к текущей неделе с небольшой задержкой для отрисовки
-    setTimeout(() => {
-        scrollToCurrentWeek();
-    }, 50);
+    // Прокручиваем к текущей неделе
+    scrollToCurrentWeek();
 }
 
-// Плавная прокрутка к текущей неделе
+// Прокрутка к текущей неделе
 function scrollToCurrentWeek() {
     const calendarWrapper = document.getElementById('calendarWrapper');
     const dayItem = calendarWrapper.querySelector(`.day-item[data-date="${formatDate(selectedDate)}"]`);
@@ -177,12 +175,8 @@ function scrollToCurrentWeek() {
         const itemWidth = dayItem.offsetWidth;
         const wrapperWidth = calendarWrapper.offsetWidth;
         
-        // Плавно прокручиваем так, чтобы выбранный день был по центру
-        const scrollPosition = itemLeft - (wrapperWidth / 2) + (itemWidth / 2);
-        calendarWrapper.scrollTo({
-            left: scrollPosition,
-            behavior: 'smooth'
-        });
+        // Прокручиваем так, чтобы выбранный день был по центру
+        calendarWrapper.scrollLeft = itemLeft - (wrapperWidth / 2) + (itemWidth / 2);
     }
 }
 
@@ -199,27 +193,19 @@ calendarWrapper.addEventListener('scroll', () => {
         const clientWidth = calendarWrapper.clientWidth;
         
         // Если прокрутили близко к началу - загружаем предыдущие недели
-        if (scrollLeft < 400) {
-            const oldScrollWidth = scrollWidth;
-            currentWeekStart.setDate(currentWeekStart.getDate() - 14); // Добавляем 2 недели назад
+        if (scrollLeft < 200) {
+            const oldWeekStart = new Date(currentWeekStart);
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
             generateWeekCalendar();
-            // Корректируем позицию скролла
-            setTimeout(() => {
-                const newScrollWidth = calendarWrapper.scrollWidth;
-                calendarWrapper.scrollLeft = scrollLeft + (newScrollWidth - oldScrollWidth);
-            }, 50);
         }
         
         // Если прокрутили близко к концу - загружаем следующие недели
-        if (scrollLeft + clientWidth > scrollWidth - 400) {
-            currentWeekStart.setDate(currentWeekStart.getDate() + 14); // Добавляем 2 недели вперед
+        if (scrollLeft + clientWidth > scrollWidth - 200) {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
             generateWeekCalendar();
         }
-    }, 150);
+    }, 100);
 });
-
-// Остальной код без изменений...
-// (Все функции остаются такими же, как в предыдущей версии)
 
 // Подсчет общего количества выполнений привычки
 function getTotalCompletions(habitName) {
