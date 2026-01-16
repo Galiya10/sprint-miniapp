@@ -7,6 +7,8 @@
 :root {
     --safe-area-top: env(safe-area-inset-top, 0px);
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --header-height: 64px;
+    --calendar-height: 104px;
 }
 
 body {
@@ -23,8 +25,6 @@ body {
     min-height: 100vh;
     background-color: #2C3744;
     padding: 0;
-    padding-top: calc(16px + env(safe-area-inset-top));
-    padding-bottom: calc(80px + max(16px, env(safe-area-inset-bottom)));
     position: relative;
 }
 
@@ -35,14 +35,15 @@ body {
 /* Fixed Header - всегда сверху */
 .header {
     position: fixed;
-    top: calc(16px + env(safe-area-inset-top));
+    top: 0;
     left: 0;
     right: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 16px;
-    margin-bottom: 0;
+    padding: 16px;
+    padding-top: calc(16px + env(safe-area-inset-top));
+    height: calc(var(--header-height) + env(safe-area-inset-top));
     background-color: #2C3744;
     z-index: 50;
 }
@@ -78,9 +79,10 @@ body {
 /* Fixed Week Calendar - всегда сверху под заголовком */
 .calendar-wrapper {
     position: fixed;
-    top: calc(80px + env(safe-area-inset-top));
+    top: calc(var(--header-height) + env(safe-area-inset-top));
     left: 0;
     right: 0;
+    height: var(--calendar-height);
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -89,6 +91,7 @@ body {
     background-color: #2C3744;
     z-index: 50;
     padding: 0 16px 24px 16px;
+    scroll-behavior: smooth;
 }
 
 .calendar-wrapper::-webkit-scrollbar {
@@ -171,9 +174,10 @@ body {
 
 /* Habits List with Categories - с отступом под фиксированный календарь */
 .habits-list {
-    margin-top: calc(188px + env(safe-area-inset-top));
+    margin-top: calc(var(--header-height) + var(--calendar-height) + env(safe-area-inset-top));
     margin-bottom: 16px;
     padding: 0 16px;
+    padding-bottom: calc(80px + max(16px, env(safe-area-inset-bottom)));
 }
 
 .habit-category-group {
@@ -276,16 +280,16 @@ body {
     line-height: 1;
 }
 
-/* Sprint Card - ленивец слева, окно прямоугольнее */
+/* Sprint Card - как на скриншоте */
 .sprint-card {
     position: fixed;
     bottom: calc(72px + max(0px, env(safe-area-inset-bottom)));
-    left: 0;
-    right: 0;
+    left: 16px;
+    right: 16px;
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    padding: 0 16px 8px 16px;
+    gap: 12px;
     background-color: transparent;
     z-index: 90;
     transition: transform 0.3s ease;
@@ -301,17 +305,15 @@ body {
 }
 
 .sprint-character {
-    width: 100px;
+    width: 120px;
     height: auto;
     object-fit: contain;
-    margin-right: 8px;
-    margin-bottom: 0;
     flex-shrink: 0;
+    align-self: flex-end;
 }
 
 .sprint-bubble {
     flex: 1;
-    max-width: calc(100% - 108px);
     background-color: #3E4A5A;
     border-radius: 16px;
     padding: 0;
@@ -319,6 +321,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    min-height: 120px;
 }
 
 .bubble-header {
