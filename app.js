@@ -4,12 +4,6 @@ const tg = window.Telegram?.WebApp;
 if (tg) {
     tg.ready();
     tg.expand();
-    
-    // Важно! Для fullscreen режима
-    if (tg.isFullscreen !== undefined) {
-        tg.requestFullscreen();
-    }
-    
     tg.setHeaderColor('#2C3744');
     tg.setBackgroundColor('#2C3744');
     tg.enableClosingConfirmation();
@@ -223,6 +217,9 @@ calendarWrapper.addEventListener('scroll', () => {
         }
     }, 150);
 });
+
+// Остальной код без изменений...
+// (Все функции остаются такими же, как в предыдущей версии)
 
 // Подсчет общего количества выполнений привычки
 function getTotalCompletions(habitName) {
