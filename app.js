@@ -2,6 +2,15 @@
 const tg = window.Telegram?.WebApp;
 let userId = null;
 
+// ОЧИСТКА СТАРЫХ ДАННЫХ (выполнится один раз)
+if (!localStorage.getItem('migration_v2_done')) {
+    localStorage.removeItem('userHabits');
+    localStorage.removeItem('userXP');
+    localStorage.removeItem('habitCompletions');
+    localStorage.setItem('migration_v2_done', 'true');
+    console.log('Старые данные очищены');
+}
+
 if (tg) {
     tg.ready();
     tg.expand();
