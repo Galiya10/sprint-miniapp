@@ -774,3 +774,13 @@ body {
         padding: 28px 12px 12px 12px;
     }
 }
+/* Улучшенный snap для календаря */
+.calendar-wrapper {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+}
+
+.week-container {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
