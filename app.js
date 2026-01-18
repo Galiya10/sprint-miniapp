@@ -53,7 +53,7 @@ today.setHours(0, 0, 0, 0);
 let selectedDate = new Date(today);
 
 // Текущая неделя для отображения
-let currentWeekIndex = 0; // Индекс текущей недели (0 = текущая неделя)
+let currentWeekIndex = 0;
 
 // Функция для получения начала недели (понедельник)
 function getWeekStart(date) {
@@ -106,10 +106,8 @@ function generateWeekCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
     const dayLabels = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 
-    // Очищаем календарь
     weekCalendar.innerHTML = '';
 
-    // Генерируем недели: 10 недель назад, текущая неделя, 10 недель вперед
     const weeksToShow = 21;
     const weekOffset = -10;
     const baseWeekStart = getWeekStart(today);
@@ -118,12 +116,10 @@ function generateWeekCalendar() {
         const weekStartDate = new Date(baseWeekStart);
         weekStartDate.setDate(baseWeekStart.getDate() + (weekOffset + weekNum) * 7);
 
-        // Создаем контейнер для недели
         const weekContainer = document.createElement('div');
         weekContainer.className = 'week-container';
         weekContainer.dataset.weekIndex = weekOffset + weekNum;
 
-        // Создаем 7 дней для каждой недели
         for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
             const date = new Date(weekStartDate);
             date.setDate(weekStartDate.getDate() + dayOffset);
@@ -132,7 +128,6 @@ function generateWeekCalendar() {
             dayItem.className = 'day-item';
             dayItem.dataset.date = formatDate(date);
 
-            // Применяем стили в зависимости от даты
             if (isSameDate(date, selectedDate)) {
                 dayItem.classList.add('selected');
             } else if (isSameDate(date, today)) {
@@ -155,14 +150,11 @@ function generateWeekCalendar() {
             dayItem.appendChild(dayNumber);
             weekContainer.appendChild(dayItem);
 
-            // Добавляем обработчик клика
             dayItem.addEventListener('click', () => {
-                // Снимаем выделение со всех дней
                 document.querySelectorAll('.day-item').forEach(item => {
                     item.classList.remove('selected');
                     const itemDate = new Date(item.dataset.date);
 
-                    // Восстанавливаем правильные классы
                     if (isSameDate(itemDate, today)) {
                         item.classList.add('today');
                     } else if (isPast(itemDate)) {
@@ -172,7 +164,6 @@ function generateWeekCalendar() {
                     }
                 });
 
-                // Выделяем выбранный день
                 dayItem.classList.add('selected');
                 dayItem.classList.remove('today', 'past', 'future');
                 selectedDate = new Date(date);
@@ -181,7 +172,6 @@ function generateWeekCalendar() {
                     tg.HapticFeedback.impactOccurred('light');
                 }
 
-                // Обновляем отображение привычек для выбранной даты
                 renderUserHabits();
             });
         }
@@ -189,7 +179,6 @@ function generateWeekCalendar() {
         weekCalendar.appendChild(weekContainer);
     }
 
-    // Прокручиваем к текущей неделе
     setTimeout(() => {
         scrollToWeek(0);
     }, 100);
@@ -200,7 +189,6 @@ function scrollToWeek(weekIndex) {
     const calendarWrapper = document.getElementById('calendarWrapper');
     const weekContainers = document.querySelectorAll('.week-container');
 
-    // Находим нужный контейнер недели
     const targetWeek = Array.from(weekContainers).find(
         container => parseInt(container.dataset.weekIndex) === weekIndex
     );
@@ -243,13 +231,10 @@ function handleWeekSwipe() {
     const swipeThreshold = 50;
     const swipeDistance = touchStartX - touchEndX;
 
-    // Проверяем, достаточно ли большой свайп
     if (Math.abs(swipeDistance) > swipeThreshold) {
         if (swipeDistance > 0) {
-            // Свайп влево - следующая неделя
             scrollToWeek(currentWeekIndex + 1);
         } else {
-            // Свайп вправо - предыдущая неделя
             scrollToWeek(currentWeekIndex - 1);
         }
 
@@ -257,7 +242,6 @@ function handleWeekSwipe() {
             tg.HapticFeedback.impactOccurred('light');
         }
     } else {
-        // Если свайп недостаточно большой, возвращаемся к текущей неделе
         scrollToWeek(currentWeekIndex);
     }
 }
@@ -270,7 +254,6 @@ calendarWrapper.addEventListener('scroll', () => {
         const scrollLeft = calendarWrapper.scrollLeft;
         const weekContainers = document.querySelectorAll('.week-container');
 
-        // Находим ближайшую неделю
         let closestWeek = null;
         let closestDistance = Infinity;
 
@@ -348,15 +331,13 @@ function renderUserHabits() {
 
     const selectedDateStr = formatDate(selectedDate);
 
-    // Добавляем кнопку "Добавить привычку" В НАЧАЛО
-    const addButton = document.createElement('button');
-    addButton.className = 'add-habit-btn';
-    addButton.innerHTML = '<span class="plus-icon">+</span> добавить новую привычку';
-    addButton.addEventListener('click', openHabitsPage);
-    habitsList.appendChild(addButton);
-
     if (userHabits.length === 0) {
-        // Если нет привычек, показываем только кнопку добавления
+        // Если нет привычек, кнопка СВЕРХУ
+        const addButton = document.createElement('button');
+        addButton.className = 'add-habit-btn';
+        addButton.innerHTML = '<span class="plus-icon">+</span> добавить новую привычку';
+        addButton.addEventListener('click', openHabitsPage);
+        habitsList.appendChild(addButton);
         return;
     }
 
@@ -399,7 +380,7 @@ function renderUserHabits() {
                 </button>
             `;
 
-            // Клик на привычку для статистики
+            // Клик на привычку для статистики и удаления
             habitItem.querySelector('.user-habit-info').addEventListener('click', () => {
                 showHabitStats(habit, index);
             });
@@ -416,11 +397,17 @@ function renderUserHabits() {
 
         habitsList.appendChild(categoryGroup);
     });
+
+    // Добавляем кнопку ПОСЛЕ всех привычек
+    const addButton = document.createElement('button');
+    addButton.className = 'add-habit-btn';
+    addButton.innerHTML = '<span class="plus-icon">+</span> добавить новую привычку';
+    addButton.addEventListener('click', openHabitsPage);
+    habitsList.appendChild(addButton);
 }
 
 // Переключение выполнения привычки
 function toggleHabitCompletion(habit, checkbox, dateStr) {
-    // Нельзя отмечать будущие даты
     const checkDate = new Date(dateStr);
     if (checkDate > today) {
         if (tg?.HapticFeedback) {
@@ -436,7 +423,6 @@ function toggleHabitCompletion(habit, checkbox, dateStr) {
     const isCurrentlyCompleted = habitCompletions[dateStr][habit.name] || false;
 
     if (isCurrentlyCompleted) {
-        // Снять отметку
         habitCompletions[dateStr][habit.name] = false;
         checkbox.classList.remove('completed');
         checkbox.textContent = '';
@@ -446,7 +432,6 @@ function toggleHabitCompletion(habit, checkbox, dateStr) {
             tg.HapticFeedback.impactOccurred('light');
         }
     } else {
-        // Поставить отметку
         habitCompletions[dateStr][habit.name] = true;
         checkbox.classList.add('completed');
         checkbox.textContent = '✓';
@@ -457,7 +442,6 @@ function toggleHabitCompletion(habit, checkbox, dateStr) {
         }
     }
 
-    // Сохраняем данные пользователя
     setUserData('habitCompletions', habitCompletions);
     setUserData('userXP', userXP);
     updateXPDisplay();
@@ -488,7 +472,7 @@ function addHabitFromCatalog(habitName, habitXP, category) {
         return;
     }
 
-    // ДОБАВЛЯЕМ В КОНЕЦ МАССИВА
+    // Добавляем в конец массива
     userHabits.push({
         name: habitName,
         xp: habitXP,
