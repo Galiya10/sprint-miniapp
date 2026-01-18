@@ -9,9 +9,6 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "dependencies": {
-    "@twa-dev/sdk": "^7.10.1"
-  },
   "devDependencies": {
     "vite": "^5.4.11"
   }
