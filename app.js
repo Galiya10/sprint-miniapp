@@ -80,7 +80,7 @@ function checkSprintVisibility() {
     }
 }
 
-// Генерируем календарь с возможностью скролла по неделям
+// Генерируем календарь с плавным скроллом по неделям
 function generateWeekCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
     const dayLabels = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
@@ -88,9 +88,9 @@ function generateWeekCalendar() {
     // Очищаем календарь
     weekCalendar.innerHTML = '';
     
-    // Генерируем недели: 2 недели назад, текущая неделя, 2 недели вперед (всего 5 недель)
-    const weeksToShow = 5;
-    const weekOffset = -2; // начинаем с 2 недель назад
+    // Генерируем недели: 8 недель назад, текущая неделя, 8 недель вперед (всего 17 недель)
+    const weeksToShow = 17;
+    const weekOffset = -8;
     
     for (let weekNum = 0; weekNum < weeksToShow; weekNum++) {
         const weekStartDate = new Date(currentWeekStart);
@@ -161,11 +161,13 @@ function generateWeekCalendar() {
         }
     }
     
-    // Прокручиваем к текущей неделе
-    scrollToCurrentWeek();
+    // Прокручиваем к текущей неделе с небольшой задержкой для отрисовки
+    setTimeout(() => {
+        scrollToCurrentWeek();
+    }, 100);
 }
 
-// Прокрутка к текущей неделе
+// Плавная прокрутка к текущей неделе с центрированием
 function scrollToCurrentWeek() {
     const calendarWrapper = document.getElementById('calendarWrapper');
     const dayItem = calendarWrapper.querySelector(`.day-item[data-date="${formatDate(selectedDate)}"]`);
@@ -175,37 +177,79 @@ function scrollToCurrentWeek() {
         const itemWidth = dayItem.offsetWidth;
         const wrapperWidth = calendarWrapper.offsetWidth;
         
-        // Прокручиваем так, чтобы выбранный день был по центру
-        calendarWrapper.scrollLeft = itemLeft - (wrapperWidth / 2) + (itemWidth / 2);
+        // Центрируем выбранный день
+        const scrollPosition = itemLeft - (wrapperWidth / 2) + (itemWidth / 2);
+        
+        calendarWrapper.scrollTo({
+            left: Math.max(0, scrollPosition),
+            behavior: 'smooth'
+        });
     }
 }
 
 // Обработка скролла календаря для динамической подгрузки недель
-let isScrolling;
+let scrollTimeout;
 const calendarWrapper = document.getElementById('calendarWrapper');
 
 calendarWrapper.addEventListener('scroll', () => {
-    window.clearTimeout(isScrolling);
+    clearTimeout(scrollTimeout);
     
-    isScrolling = setTimeout(() => {
+    scrollTimeout = setTimeout(() => {
         const scrollLeft = calendarWrapper.scrollLeft;
         const scrollWidth = calendarWrapper.scrollWidth;
         const clientWidth = calendarWrapper.clientWidth;
         
         // Если прокрутили близко к началу - загружаем предыдущие недели
-        if (scrollLeft < 200) {
-            const oldWeekStart = new Date(currentWeekStart);
-            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+        if (scrollLeft < 500) {
+            const oldScrollWidth = scrollWidth;
+            const oldScrollLeft = scrollLeft;
+            currentWeekStart.setDate(currentWeekStart.getDate() - 21); // Добавляем 3 недели назад
             generateWeekCalendar();
+            
+            // Корректируем позицию скролла
+            setTimeout(() => {
+                const newScrollWidth = calendarWrapper.scrollWidth;
+                calendarWrapper.scrollLeft = oldScrollLeft + (newScrollWidth - oldScrollWidth);
+            }, 50);
         }
         
         // Если прокрутили близко к концу - загружаем следующие недели
-        if (scrollLeft + clientWidth > scrollWidth - 200) {
-            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+        if (scrollLeft + clientWidth > scrollWidth - 500) {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 21); // Добавляем 3 недели вперед
             generateWeekCalendar();
         }
-    }, 100);
+    }, 150);
 });
+
+// Плавный скролл по неделям при свайпе
+let touchStartX = 0;
+let touchEndX = 0;
+
+calendarWrapper.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+calendarWrapper.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    const swipeDistance = touchStartX - touchEndX;
+    
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+        const direction = swipeDistance > 0 ? 1 : -1; // 1 = вправо, -1 = влево
+        const weekWidth = 7 * 56; // 7 дней * (48px + 8px gap)
+        const currentScroll = calendarWrapper.scrollLeft;
+        const targetScroll = currentScroll + (direction * weekWidth);
+        
+        calendarWrapper.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+        });
+    }
+}
 
 // Подсчет общего количества выполнений привычки
 function getTotalCompletions(habitName) {
