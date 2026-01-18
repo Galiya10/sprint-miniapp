@@ -1,93 +1,42 @@
-// Инициализация Telegram Web App
+// Инициализация Telegram Web App с защитой от race condition
 let tg = null;
 let userId = null;
-let isInitialized = false;
 
-// Функция безопасной инициализации Telegram WebApp
+// Безопасная инициализация с ожиданием загрузки SDK
 function initTelegramWebApp() {
-    return new Promise((resolve) => {
-        if (window.Telegram?.WebApp) {
-            tg = window.Telegram.WebApp;
-            tg.ready();
-            tg.expand();
-            
-            // Применяем тему Telegram
-            applyTelegramTheme();
-            
-            // Включаем подтверждение закрытия
-            tg.enableClosingConfirmation();
-            
-            // Получаем ID пользователя
-            userId = tg.initDataUnsafe?.user?.id || `demo_${Date.now()}`;
-            
-            // Настраиваем кнопку "Назад"
-            setupBackButton();
-            
-            isInitialized = true;
-            resolve(true);
-        } else {
-            // Для тестирования вне Telegram
-            userId = `demo_${Date.now()}`;
-            console.log('Running in demo mode outside Telegram');
-            resolve(false);
-        }
-    });
-}
-
-// Применение темы Telegram
-function applyTelegramTheme() {
-    if (!tg) return;
-    
-    const root = document.documentElement;
-    const theme = tg.themeParams;
-    
-    if (theme.bg_color) {
-        root.style.setProperty('--bg-color', theme.bg_color);
-    }
-    if (theme.secondary_bg_color) {
-        root.style.setProperty('--card-bg', theme.secondary_bg_color);
-    }
-    if (theme.text_color) {
-        root.style.setProperty('--text-primary', theme.text_color);
-    }
-    if (theme.hint_color) {
-        root.style.setProperty('--text-secondary', theme.hint_color);
-    }
-    if (theme.button_color) {
-        root.style.setProperty('--accent-color', theme.button_color);
-    }
-    
-    // Устанавливаем цвета header
-    tg.setHeaderColor(theme.bg_color || '#2C3744');
-    tg.setBackgroundColor(theme.bg_color || '#2C3744');
-}
-
-// Настройка кнопки "Назад"
-function setupBackButton() {
-    if (!tg) return;
-    
-    tg.BackButton.onClick(() => {
-        const pages = ['mainPage', 'habitsPage', 'statsPage'];
-        const currentPage = pages.find(pageId => 
-            !document.getElementById(pageId).classList.contains('hidden')
-        );
+    if (window.Telegram?.WebApp) {
+        tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#2C3744');
+        tg.setBackgroundColor('#2C3744');
+        tg.enableClosingConfirmation();
         
-        if (currentPage !== 'mainPage') {
-            switchToPage('today');
-        }
-    });
-}
-
-// Haptic feedback
-function hapticFeedback(style = 'medium') {
-    if (tg && tg.HapticFeedback) {
-        if (style === 'success') {
-            tg.HapticFeedback.notificationOccurred('success');
-        } else if (style === 'error') {
-            tg.HapticFeedback.notificationOccurred('error');
-        } else {
-            tg.HapticFeedback.impactOccurred(style); // light, medium, heavy
-        }
+        // Получаем ID пользователя Telegram
+        userId = tg.initDataUnsafe?.user?.id || 'demo_user';
+        
+        // Устанавливаем кнопку "Назад" для страницы привычек
+        tg.BackButton.onClick(() => {
+            const habitsPage = document.getElementById('habitsPage');
+            const statsPage = document.getElementById('statsPage');
+            const mainPage = document.getElementById('mainPage');
+            
+            if (!habitsPage.classList.contains('hidden')) {
+                habitsPage.classList.add('hidden');
+                mainPage.classList.remove('hidden');
+                tg.BackButton.hide();
+                updateBottomNav('today');
+            } else if (!statsPage.classList.contains('hidden')) {
+                statsPage.classList.add('hidden');
+                mainPage.classList.remove('hidden');
+                tg.BackButton.hide();
+                updateBottomNav('today');
+            }
+        });
+    } else {
+        // Для тестирования вне Telegram
+        userId = 'demo_user';
+        console.log('Running outside Telegram');
     }
 }
 
@@ -101,7 +50,7 @@ function getUserData(key, defaultValue) {
         const data = localStorage.getItem(getUserKey(key));
         return data ? JSON.parse(data) : defaultValue;
     } catch (e) {
-        console.error('Error reading from localStorage:', e);
+        console.error('Error reading localStorage:', e);
         return defaultValue;
     }
 }
@@ -120,14 +69,14 @@ let userXP = 0;
 let habitCompletions = {};
 let selectedHabitIndex = null;
 
-// Загрузка данных пользователя
+// Функция загрузки данных пользователя
 function loadUserData() {
     userHabits = getUserData('userHabits', []);
     userXP = getUserData('userXP', 0);
     habitCompletions = getUserData('habitCompletions', {});
 }
 
-// Сохранение данных пользователя
+// Функция сохранения данных пользователя
 function saveUserData() {
     setUserData('userHabits', userHabits);
     setUserData('userXP', userXP);
@@ -192,24 +141,29 @@ function isFuture(date) {
 
 // Обновление счетчика XP
 function updateXPDisplay() {
-    document.getElementById('xpCount').textContent = userXP;
+    const xpElement = document.getElementById('xpCount');
+    if (xpElement) {
+        xpElement.textContent = userXP;
+    }
 }
 
 // Проверка, нужно ли показывать Спринта
 function checkSprintVisibility() {
     const sprintCard = document.getElementById('sprintCard');
-    const sprintDismissed = getUserData('sprintDismissed', false);
-    
-    if (userHabits.length === 0 && !sprintDismissed) {
-        sprintCard.classList.remove('hidden');
-    } else {
-        sprintCard.classList.add('hidden');
+    if (sprintCard) {
+        if (userHabits.length === 0) {
+            sprintCard.classList.remove('hidden');
+        } else {
+            sprintCard.classList.add('hidden');
+        }
     }
 }
 
 // Генерируем календарь с горизонтальным скроллом по неделям
 function generateWeekCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
+    if (!weekCalendar) return;
+    
     weekCalendar.innerHTML = '';
 
     const weekStart = getWeekStart(today);
@@ -245,7 +199,9 @@ function generateWeekCalendar() {
         } else {
             // Проверяем, есть ли выполненные привычки в этот день
             const dateStr = formatDate(date);
-            const completed = Object.values(habitCompletions).some(dates => dates.includes(dateStr));
+            const completed = Object.values(habitCompletions).some(dates => 
+                Array.isArray(dates) && dates.includes(dateStr)
+            );
             if (completed) {
                 dayDiv.classList.add('completed');
             }
@@ -256,7 +212,6 @@ function generateWeekCalendar() {
                 selectedDate = new Date(date);
                 generateWeekCalendar();
                 renderHabits();
-                hapticFeedback('light');
             }
         });
 
@@ -275,6 +230,8 @@ function generateWeekCalendar() {
 // Рендер привычек по категориям
 function renderHabits() {
     const habitsList = document.getElementById('habitsList');
+    if (!habitsList) return;
+    
     habitsList.innerHTML = '';
 
     if (userHabits.length === 0) {
@@ -299,6 +256,8 @@ function renderHabits() {
     // Рендерим каждую категорию
     Object.keys(groupedHabits).forEach(categoryKey => {
         const category = categories[categoryKey];
+        if (!category) return;
+        
         const habits = groupedHabits[categoryKey];
 
         const section = document.createElement('div');
@@ -357,12 +316,10 @@ function toggleHabit(index) {
         // Убираем выполнение
         habitCompletions[index].splice(completedIndex, 1);
         userXP -= userHabits[index].xp;
-        hapticFeedback('light');
     } else {
         // Добавляем выполнение
         habitCompletions[index].push(dateStr);
         userXP += userHabits[index].xp;
-        hapticFeedback('success');
     }
 
     saveUserData();
@@ -378,9 +335,11 @@ const habitNameInput = document.getElementById('habitName');
 const habitXPInput = document.getElementById('habitXP');
 
 function openHabitModal(editIndex = null) {
+    if (!habitModal) return;
+    
     selectedHabitIndex = editIndex;
     
-    if (editIndex !== null) {
+    if (editIndex !== null && userHabits[editIndex]) {
         const habit = userHabits[editIndex];
         modalTitle.textContent = 'Редактировать привычку';
         habitNameInput.value = habit.name;
@@ -403,28 +362,27 @@ function openHabitModal(editIndex = null) {
     }
     
     habitModal.classList.remove('hidden');
-    hapticFeedback('light');
 }
 
 function closeHabitModal() {
-    habitModal.classList.add('hidden');
+    if (habitModal) {
+        habitModal.classList.add('hidden');
+    }
     selectedHabitIndex = null;
 }
 
 function saveHabit() {
     const name = habitNameInput.value.trim();
-    const xp = parseInt(habitXPInput.value);
+    const xp = parseInt(habitXPInput.value) || 10;
     const selectedCategory = document.querySelector('.category-btn.selected');
     
     if (!name) {
         alert('Введите название привычки');
-        hapticFeedback('error');
         return;
     }
     
     if (!selectedCategory) {
         alert('Выберите категорию');
-        hapticFeedback('error');
         return;
     }
     
@@ -443,38 +401,38 @@ function saveHabit() {
     renderHabits();
     renderAllHabits();
     checkSprintVisibility();
-    hapticFeedback('success');
 }
 
 // Удаление привычки
 function deleteHabit(index) {
-    if (confirm('Удалить эту привычку?')) {
-        userHabits.splice(index, 1);
-        delete habitCompletions[index];
-        
-        // Перенумеровываем completions
-        const newCompletions = {};
-        Object.keys(habitCompletions).forEach(key => {
-            const numKey = parseInt(key);
-            if (numKey > index) {
-                newCompletions[numKey - 1] = habitCompletions[key];
-            } else if (numKey < index) {
-                newCompletions[numKey] = habitCompletions[key];
-            }
-        });
-        habitCompletions = newCompletions;
-        
-        saveUserData();
-        renderHabits();
-        renderAllHabits();
-        checkSprintVisibility();
-        hapticFeedback('success');
-    }
+    if (!confirm('Удалить эту привычку?')) return;
+    
+    userHabits.splice(index, 1);
+    delete habitCompletions[index];
+    
+    // Перенумеровываем completions
+    const newCompletions = {};
+    Object.keys(habitCompletions).forEach(key => {
+        const numKey = parseInt(key);
+        if (numKey > index) {
+            newCompletions[numKey - 1] = habitCompletions[key];
+        } else if (numKey < index) {
+            newCompletions[numKey] = habitCompletions[key];
+        }
+    });
+    habitCompletions = newCompletions;
+    
+    saveUserData();
+    renderHabits();
+    renderAllHabits();
+    checkSprintVisibility();
 }
 
 // Рендер всех привычек на странице "Привычки"
 function renderAllHabits() {
     const allHabitsList = document.getElementById('allHabitsList');
+    if (!allHabitsList) return;
+    
     allHabitsList.innerHTML = '';
 
     if (userHabits.length === 0) {
@@ -489,6 +447,8 @@ function renderAllHabits() {
 
     userHabits.forEach((habit, index) => {
         const category = categories[habit.category];
+        if (!category) return;
+        
         const item = document.createElement('div');
         item.className = 'habit-item';
 
@@ -525,16 +485,21 @@ function renderAllHabits() {
 // Рендер статистики
 function renderStats() {
     // Общая статистика
-    document.getElementById('totalXP').textContent = userXP;
-    document.getElementById('totalHabits').textContent = userHabits.length;
+    const totalXPElement = document.getElementById('totalXP');
+    const totalHabitsElement = document.getElementById('totalHabits');
+    const completedTodayElement = document.getElementById('completedToday');
+    const currentStreakElement = document.getElementById('currentStreak');
+    
+    if (totalXPElement) totalXPElement.textContent = userXP;
+    if (totalHabitsElement) totalHabitsElement.textContent = userHabits.length;
 
     // Выполнено сегодня
     const todayStr = formatDate(today);
     let completedToday = 0;
     Object.values(habitCompletions).forEach(dates => {
-        if (dates.includes(todayStr)) completedToday++;
+        if (Array.isArray(dates) && dates.includes(todayStr)) completedToday++;
     });
-    document.getElementById('completedToday').textContent = completedToday;
+    if (completedTodayElement) completedTodayElement.textContent = completedToday;
 
     // Текущая серия (самая длинная streak среди всех привычек)
     let maxStreak = 0;
@@ -542,10 +507,12 @@ function renderStats() {
         const streak = calculateStreak(index);
         if (streak > maxStreak) maxStreak = streak;
     });
-    document.getElementById('currentStreak').textContent = maxStreak;
+    if (currentStreakElement) currentStreakElement.textContent = maxStreak;
 
     // Прогресс по каждой привычке
     const habitsProgressList = document.getElementById('habitsProgressList');
+    if (!habitsProgressList) return;
+    
     habitsProgressList.innerHTML = '';
 
     if (userHabits.length === 0) {
@@ -560,6 +527,8 @@ function renderStats() {
 
     userHabits.forEach((habit, index) => {
         const category = categories[habit.category];
+        if (!category) return;
+        
         const completions = habitCompletions[index] || [];
         
         // Считаем процент выполнения за последние 30 дней
@@ -569,12 +538,9 @@ function renderStats() {
         for (let i = 0; i < 30; i++) {
             const date = new Date(today);
             date.setDate(date.getDate() - i);
-            
-            if (date >= new Date(habit.createdAt || today)) {
-                daysInPeriod++;
-                if (completions.includes(formatDate(date))) {
-                    completedInPeriod++;
-                }
+            daysInPeriod++;
+            if (Array.isArray(completions) && completions.includes(formatDate(date))) {
+                completedInPeriod++;
             }
         }
         
@@ -600,6 +566,8 @@ function renderStats() {
 // Вычисление текущей серии для привычки
 function calculateStreak(habitIndex) {
     const completions = habitCompletions[habitIndex] || [];
+    if (!Array.isArray(completions)) return 0;
+    
     let streak = 0;
     const checkDate = new Date(today);
 
@@ -616,6 +584,16 @@ function calculateStreak(habitIndex) {
     return streak;
 }
 
+// Обновление нижней навигации
+function updateBottomNav(page) {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.page === page) {
+            item.classList.add('active');
+        }
+    });
+}
+
 // Переключение между страницами
 function switchToPage(page) {
     const pages = {
@@ -626,23 +604,22 @@ function switchToPage(page) {
 
     // Скрываем все страницы
     Object.values(pages).forEach(pageId => {
-        document.getElementById(pageId).classList.add('hidden');
+        const element = document.getElementById(pageId);
+        if (element) element.classList.add('hidden');
     });
 
     // Показываем нужную страницу
     const pageId = pages[page];
-    document.getElementById(pageId).classList.remove('hidden');
+    const pageElement = document.getElementById(pageId);
+    if (pageElement) {
+        pageElement.classList.remove('hidden');
+    }
 
     // Обновляем навигацию
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.page === page) {
-            item.classList.add('active');
-        }
-    });
+    updateBottomNav(page);
 
     // Управление кнопкой "Назад" в Telegram
-    if (tg) {
+    if (tg && tg.BackButton) {
         if (page === 'today') {
             tg.BackButton.hide();
         } else {
@@ -656,14 +633,12 @@ function switchToPage(page) {
     } else if (page === 'stats') {
         renderStats();
     }
-
-    hapticFeedback('light');
 }
 
 // Инициализация приложения
-async function initApp() {
+function initApp() {
     // Инициализируем Telegram WebApp
-    await initTelegramWebApp();
+    initTelegramWebApp();
     
     // Загружаем данные пользователя
     loadUserData();
@@ -677,42 +652,56 @@ async function initApp() {
     // Обработчики событий
     
     // Кнопки добавления привычки
-    document.getElementById('addHabitBtn').addEventListener('click', () => {
-        openHabitModal();
-    });
+    const addHabitBtn = document.getElementById('addHabitBtn');
+    const addHabitBtn2 = document.getElementById('addHabitBtn2');
     
-    document.getElementById('addHabitBtn2').addEventListener('click', () => {
-        openHabitModal();
-    });
+    if (addHabitBtn) {
+        addHabitBtn.addEventListener('click', () => openHabitModal());
+    }
+    
+    if (addHabitBtn2) {
+        addHabitBtn2.addEventListener('click', () => openHabitModal());
+    }
     
     // Закрытие модального окна
-    document.getElementById('closeModal').addEventListener('click', closeHabitModal);
+    const closeModal = document.getElementById('closeModal');
+    if (closeModal) {
+        closeModal.addEventListener('click', closeHabitModal);
+    }
     
     // Клик вне модального окна
-    habitModal.addEventListener('click', (e) => {
-        if (e.target === habitModal) {
-            closeHabitModal();
-        }
-    });
+    if (habitModal) {
+        habitModal.addEventListener('click', (e) => {
+            if (e.target === habitModal) {
+                closeHabitModal();
+            }
+        });
+    }
     
     // Сохранение привычки
-    document.getElementById('saveHabitBtn').addEventListener('click', saveHabit);
+    const saveHabitBtn = document.getElementById('saveHabitBtn');
+    if (saveHabitBtn) {
+        saveHabitBtn.addEventListener('click', saveHabit);
+    }
     
     // Выбор категории
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
             e.currentTarget.classList.add('selected');
-            hapticFeedback('light');
         });
     });
     
     // Закрытие карточки Спринта
-    document.getElementById('closeSprintCard').addEventListener('click', () => {
-        document.getElementById('sprintCard').classList.add('hidden');
-        setUserData('sprintDismissed', true);
-        hapticFeedback('light');
-    });
+    const closeSprintCard = document.getElementById('closeSprintCard');
+    if (closeSprintCard) {
+        closeSprintCard.addEventListener('click', () => {
+            const sprintCard = document.getElementById('sprintCard');
+            if (sprintCard) {
+                sprintCard.classList.add('hidden');
+            }
+        });
+    }
     
     // Навигация
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -728,14 +717,16 @@ async function initApp() {
     
     const calendarWrapper = document.getElementById('calendarWrapper');
     
-    calendarWrapper.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-    
-    calendarWrapper.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
+    if (calendarWrapper) {
+        calendarWrapper.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        calendarWrapper.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+    }
     
     function handleSwipe() {
         const swipeThreshold = 50;
@@ -744,17 +735,15 @@ async function initApp() {
         if (Math.abs(diff) > swipeThreshold) {
             if (diff > 0) {
                 // Свайп влево - следующая неделя
-                if (currentWeekIndex < 4) { // Ограничиваем будущими неделями
+                if (currentWeekIndex < 4) {
                     currentWeekIndex++;
                     generateWeekCalendar();
-                    hapticFeedback('light');
                 }
             } else {
                 // Свайп вправо - предыдущая неделя
-                if (currentWeekIndex > -52) { // Ограничиваем прошлым годом
+                if (currentWeekIndex > -52) {
                     currentWeekIndex--;
                     generateWeekCalendar();
-                    hapticFeedback('light');
                 }
             }
         }
