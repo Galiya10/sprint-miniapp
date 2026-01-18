@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 22.08 22.08" style="enable-background:new 0 0 22.08 22.08;" xml:space="preserve">
+<style type="text/css">
+	.st0{clip-path:url(#SVGID_00000180349797767667756850000008795416444710054030_);}
+	.st1{fill:none;stroke:#A6A6A6;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+</style>
+<g>
+	<defs>
+		<rect id="SVGID_1_" x="0.04" y="0.04" width="22" height="22"/>
+	</defs>
+	<clipPath id="SVGID_00000031174496025269403990000015206549307527092892_">
+		<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+	</clipPath>
+	<g style="clip-path:url(#SVGID_00000031174496025269403990000015206549307527092892_);">
+		<path class="st1" d="M6.41,9.24v6.86"/>
+		<path class="st1" d="M11.08,5.96V16.1"/>
+		<path class="st1" d="M15.67,12.87v3.24"/>
+		<path class="st1" d="M15.73,1.04H6.35c-3.27,0-5.31,2.31-5.31,5.59v8.83c0,3.27,2.04,5.59,5.31,5.59h9.37
+			c3.28,0,5.31-2.31,5.31-5.59V6.62C21.04,3.35,19,1.04,15.73,1.04z"/>
+	</g>
+</g>
+</svg>
