@@ -1,15 +1,28 @@
+// ============================================
+// ПРИНУДИТЕЛЬНАЯ ОЧИСТКА ВСЕХ ДАННЫХ
+// ============================================
+// Удаляем ВСЕ ключи, связанные с приложением
+const keysToRemove = [];
+for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.includes('user') || key.includes('habit') || key.includes('xp') || key.includes('Habit') || key.includes('XP'))) {
+        keysToRemove.push(key);
+    }
+}
+keysToRemove.forEach(key => localStorage.removeItem(key));
+
+// Также очищаем старые ключи напрямую
+localStorage.removeItem('userHabits');
+localStorage.removeItem('userXP');
+localStorage.removeItem('habitCompletions');
+
+console.log('✅ Все данные очищены. Приложение запущено с чистого листа.');
+
+// ============================================
 // Инициализация Telegram Web App
+// ============================================
 const tg = window.Telegram?.WebApp;
 let userId = null;
-
-// ОЧИСТКА СТАРЫХ ДАННЫХ (выполнится один раз)
-if (!localStorage.getItem('migration_v2_done')) {
-    localStorage.removeItem('userHabits');
-    localStorage.removeItem('userXP');
-    localStorage.removeItem('habitCompletions');
-    localStorage.setItem('migration_v2_done', 'true');
-    console.log('Старые данные очищены');
-}
 
 if (tg) {
     tg.ready();
@@ -53,6 +66,8 @@ let userHabits = getUserData('userHabits', []);
 let userXP = getUserData('userXP', 0);
 let habitCompletions = getUserData('habitCompletions', {});
 let selectedHabitIndex = null;
+
+console.log('📊 Загруженные данные пользователя:', { userHabits, userXP, habitCompletions });;
 
 // Получаем текущую дату
 const today = new Date();
