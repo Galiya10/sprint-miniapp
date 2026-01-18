@@ -7,6 +7,8 @@
 :root {
     --safe-area-top: env(safe-area-inset-top, 0px);
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --header-height: 64px;
+    --calendar-height: 104px;
 }
 
 body {
@@ -23,8 +25,6 @@ body {
     min-height: 100vh;
     background-color: #2C3744;
     padding: 0;
-    padding-top: calc(16px + env(safe-area-inset-top));
-    padding-bottom: calc(80px + max(16px, env(safe-area-inset-bottom)));
     position: relative;
 }
 
@@ -35,14 +35,15 @@ body {
 /* Fixed Header - всегда сверху */
 .header {
     position: fixed;
-    top: calc(16px + env(safe-area-inset-top));
+    top: 0;
     left: 0;
     right: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 16px;
-    margin-bottom: 0;
+    padding: 16px;
+    padding-top: calc(16px + var(--safe-area-top));
+    height: calc(var(--header-height) + var(--safe-area-top));
     background-color: #2C3744;
     z-index: 50;
 }
@@ -75,13 +76,14 @@ body {
     height: 24px;
 }
 
-/* Fixed Week Calendar - всегда сверху под заголовком */
+/* Fixed Week Calendar - плавный скролл */
 .calendar-wrapper {
     position: fixed;
-    top: calc(80px + env(safe-area-inset-top));
+    top: calc(var(--header-height) + var(--safe-area-top));
     left: 0;
     right: 0;
-    overflow-x: auto;
+    height: var(--calendar-height);
+    overflow-x: scroll;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -89,6 +91,8 @@ body {
     background-color: #2C3744;
     z-index: 50;
     padding: 0 16px 24px 16px;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
 }
 
 .calendar-wrapper::-webkit-scrollbar {
@@ -99,7 +103,7 @@ body {
     display: inline-flex;
     gap: 8px;
     padding: 4px 0;
-    min-width: 100%;
+    min-width: max-content;
 }
 
 .day-item {
@@ -112,10 +116,11 @@ body {
     min-width: 48px;
     min-height: 76px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     padding: 10px 8px;
     border-radius: 12px;
     border: 2px solid transparent;
+    scroll-snap-align: start;
 }
 
 .day-label {
@@ -169,11 +174,12 @@ body {
     color: #A7A7A7;
 }
 
-/* Habits List with Categories - с отступом под фиксированный календарь */
+/* Habits List with Categories */
 .habits-list {
-    margin-top: calc(188px + env(safe-area-inset-top));
+    margin-top: calc(var(--header-height) + var(--calendar-height) + var(--safe-area-top));
     margin-bottom: 16px;
     padding: 0 16px;
+    padding-bottom: calc(80px + max(16px, var(--safe-area-bottom)));
 }
 
 .habit-category-group {
@@ -276,15 +282,16 @@ body {
     line-height: 1;
 }
 
-/* Sprint Card - ленивец слева, окно прямоугольнее */
+/* Sprint Card - новый дизайн как на скриншоте */
 .sprint-card {
     position: fixed;
-    bottom: calc(72px + max(0px, env(safe-area-inset-bottom)));
+    bottom: calc(72px + max(0px, var(--safe-area-bottom)));
     left: 0;
     right: 0;
     display: flex;
     flex-direction: row;
     align-items: flex-end;
+    gap: 12px;
     padding: 0 16px 8px 16px;
     background-color: transparent;
     z-index: 90;
@@ -301,33 +308,34 @@ body {
 }
 
 .sprint-character {
-    width: 100px;
+    width: 130px;
     height: auto;
     object-fit: contain;
-    margin-right: 8px;
-    margin-bottom: 0;
     flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: -8px;
 }
 
 .sprint-bubble {
     flex: 1;
-    max-width: calc(100% - 108px);
     background-color: #3E4A5A;
     border-radius: 16px;
     padding: 0;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
+    max-width: calc(100% - 142px);
 }
 
 .bubble-header {
-    display: inline-block;
+    position: absolute;
+    top: -12px;
+    left: 12px;
     background-color: #C5D375;
     padding: 6px 16px;
     border-radius: 12px;
-    margin: 12px 0 0 12px;
-    width: fit-content;
+    z-index: 1;
 }
 
 .sprint-name {
@@ -342,26 +350,26 @@ body {
     font-family: 'Nunito', sans-serif;
     font-size: 14px;
     font-weight: 400;
-    line-height: 19px;
+    line-height: 18px;
     color: #FFFFFF;
-    padding: 12px 16px 16px 16px;
+    padding: 32px 14px 14px 14px;
 }
 
 .sprint-close-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 8px;
+    right: 8px;
     background: transparent;
     border: 2px solid #C5D375;
     border-radius: 50%;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: #C5D375;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1;
     z-index: 10;
     transition: all 0.2s ease;
@@ -549,7 +557,7 @@ body {
     justify-content: space-around;
     align-items: center;
     padding: 8px 16px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    padding-bottom: max(8px, var(--safe-area-bottom));
     border-top: 1px solid #3E4A5A;
     z-index: 100;
 }
@@ -571,9 +579,15 @@ body {
     transition: color 0.2s ease;
 }
 
-.nav-item svg {
+.nav-icon {
     width: 24px;
     height: 24px;
+    filter: brightness(0) saturate(100%) invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%);
+    transition: filter 0.2s ease;
+}
+
+.nav-item.active .nav-icon {
+    filter: brightness(0) saturate(100%) invert(84%) sepia(18%) saturate(646%) hue-rotate(25deg) brightness(95%) contrast(83%);
 }
 
 .nav-label {
@@ -600,8 +614,8 @@ body {
     background-color: #2C3744;
     z-index: 200;
     overflow-y: auto;
-    padding-top: max(16px, calc(16px + env(safe-area-inset-top)));
-    padding-bottom: calc(72px + max(0px, env(safe-area-inset-bottom)));
+    padding-top: max(16px, calc(16px + var(--safe-area-top)));
+    padding-bottom: calc(72px + max(0px, var(--safe-area-bottom)));
 }
 
 .habits-content {
@@ -738,5 +752,19 @@ body {
         flex: 0 0 44px;
         min-width: 44px;
         padding: 8px 6px;
+    }
+    
+    .sprint-character {
+        width: 110px;
+    }
+    
+    .sprint-bubble {
+        max-width: calc(100% - 122px);
+    }
+    
+    .sprint-text {
+        font-size: 13px;
+        line-height: 17px;
+        padding: 28px 12px 12px 12px;
     }
 }
