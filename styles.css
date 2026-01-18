@@ -1,4 +1,76 @@
-/* Sprint Card - обновленный дизайн с меньшим расстоянием */
+/* Empty State - Приветственное сообщение */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    text-align: center;
+    min-height: 300px;
+}
+
+.empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.empty-state-image {
+    width: 120px;
+    height: auto;
+    margin-bottom: 8px;
+}
+
+.empty-state-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0;
+}
+
+.empty-state-text {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 280px;
+    margin: 0;
+}
+
+/* Улучшенная кнопка добавления привычки */
+.add-habit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    background-color: #C5D375;
+    color: #1A1A1A;
+    border: none;
+    border-radius: 16px;
+    padding: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.2s ease;
+}
+
+.add-habit-btn:active {
+    transform: scale(0.98);
+    background-color: #B4C367;
+}
+
+.plus-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* Sprint Card - обновленный дизайн */
 .sprint-card {
     position: fixed;
     bottom: calc(72px + max(0px, var(--safe-area-bottom)));
@@ -7,7 +79,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    gap: 8px; /* Уменьшено с 12px до 8px */
+    gap: 8px;
     padding: 0 16px 8px 16px;
     background-color: transparent;
     z-index: 90;
@@ -41,7 +113,7 @@
     overflow: visible;
     display: flex;
     flex-direction: column;
-    max-width: calc(100% - 138px); /* Уменьшено с 142px */
+    max-width: calc(100% - 138px);
 }
 
 .bubble-header {
@@ -68,7 +140,7 @@
     font-weight: 400;
     line-height: 18px;
     color: #FFFFFF;
-    padding: 28px 12px 12px 12px; /* Уменьшены боковые отступы */
+    padding: 28px 12px 12px 12px;
 }
 
 .sprint-close-btn {
@@ -95,7 +167,7 @@
     background-color: rgba(197, 211, 117, 0.2);
 }
 
-/* Улучшенный snap для календаря */
+/* Календарь */
 .calendar-wrapper {
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
@@ -115,14 +187,26 @@
     .sprint-character {
         width: 110px;
     }
-
+    
     .sprint-bubble {
         max-width: calc(100% - 116px);
     }
-
+    
     .sprint-text {
         font-size: 13px;
         line-height: 17px;
         padding: 26px 10px 10px 10px;
+    }
+    
+    .empty-state-image {
+        width: 100px;
+    }
+    
+    .empty-state-title {
+        font-size: 20px;
+    }
+    
+    .empty-state-text {
+        font-size: 14px;
     }
 }
